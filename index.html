@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0d0d0d">
+<meta name="description" content="Cardápio do Naruá, food truck de comida asiática de rua em São Paulo. Veja as fotos dos pratos e os preços.">
+<meta property="og:title" content="Naruá · Cardápio">
+<meta property="og:description" content="Comida asiática de rua em São Paulo. Veja as fotos dos pratos e os preços.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%9C%3C/text%3E%3C/svg%3E">
+<title>Naruá · Cardápio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Titan+One&family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d0d;
+    --paper:#f7f1e2;
+    --ink:#181818;
+    --ink-soft:#5c564a;
+    --orange:#f6af43;
+    --orange2:#f49140;
+    --red:#e73334;
+    --green:#2e9e4f;
+    --cyan:#40d5e8;
+    --line:#e3dac1;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 8%, rgba(246,175,67,0.10) 0%, transparent 40%),
+      radial-gradient(circle at 85% 92%, rgba(64,213,232,0.08) 0%, transparent 40%),
+      var(--bg);
+    background-attachment:fixed;
+    color:var(--paper);
+    font-family:'Poppins',sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 44px;}
+
+  /* ---------- topo ---------- */
+  header{padding:34px 44px 8px;text-align:center;}
+  header .wordmark{font-family:'Titan One',cursive;font-size:56px;line-height:1.05;letter-spacing:.02em;color:var(--paper);-webkit-text-stroke:3px var(--ink);text-shadow:4px 4px 0 var(--orange2);}
+  header .wordmark .u{color:var(--orange);}
+  header .eyebrow{font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);margin-top:6px;}
+  header h1{font-weight:700;font-size:18px;margin:6px 0 0;color:var(--paper);}
+
+  .side-wave{position:fixed;top:0;height:100vh;width:36px;z-index:5;pointer-events:none;}
+  .side-wave-left{left:0;}
+  .side-wave-right{right:0;}
+
+  .aviso-exemplo{margin:14px auto 0;max-width:520px;background:#fff6ea;border:2px solid var(--orange2);color:#8a5a12;border-radius:10px;padding:9px 12px;font-size:12.5px;font-weight:600;text-align:center;}
+
+  /* ---------- categorias ---------- */
+  .cat-nav{position:sticky;top:0;z-index:4;background:rgba(13,13,13,0.94);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);padding:12px 0;margin:14px 0 6px;border-bottom:2px solid #222;}
+  .cat-nav .lista{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;}
+  .cat-nav .lista::-webkit-scrollbar{display:none;}
+  .chip{flex:0 0 auto;background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:8px 14px;font-family:'Poppins',sans-serif;font-weight:700;font-size:13.5px;cursor:pointer;box-shadow:2px 2px 0 var(--orange2);white-space:nowrap;}
+  .chip.ativo{background:var(--orange);box-shadow:2px 2px 0 var(--paper);}
+  .chip:focus-visible{outline:3px solid var(--cyan);outline-offset:2px;}
+
+  /* ---------- seções e cartões ---------- */
+  .secao{padding-top:22px;scroll-margin-top:70px;}
+  .secao-titulo{font-family:'Titan One',cursive;font-size:26px;font-weight:400;margin:0 0 14px;color:var(--paper);display:flex;align-items:center;gap:10px;}
+  .secao-titulo .emoji{font-size:24px;}
+
+  .grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px;}
+  .prato{background:var(--paper);border:2px solid var(--ink);border-radius:var(--radius);box-shadow:5px 5px 0 rgba(246,175,67,0.55);color:var(--ink);overflow:hidden;display:flex;flex-direction:column;}
+  .prato .foto{position:relative;display:block;width:100%;aspect-ratio:4/3;border:0;border-bottom:2px solid var(--ink);padding:0;margin:0;background:#2a2a2a;cursor:zoom-in;overflow:hidden;}
+  .prato .foto img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease;}
+  .prato .foto:hover img{transform:scale(1.04);}
+  .prato .foto:focus-visible{outline:3px solid var(--cyan);outline-offset:-3px;}
+  .prato .corpo{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1;}
+  .prato h3{font-family:'Titan One',cursive;font-weight:400;font-size:21px;line-height:1.15;margin:0;}
+  .tag-veg{align-self:flex-start;font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#1f6b36;background:#dff3e4;border:2px solid var(--green);border-radius:999px;padding:2px 9px;}
+  .prato .desc{font-size:13.5px;line-height:1.45;color:var(--ink-soft);margin:0;}
+  .precos{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:8px;align-items:center;}
+  .preco{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:16px;background:var(--orange);border:2px solid var(--ink);border-radius:8px;padding:4px 10px;white-space:nowrap;}
+  .preco .tam{font-family:'Poppins',sans-serif;font-weight:700;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;margin-right:6px;}
+  .preco-ifood{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);width:100%;}
+
+  .selo{position:absolute;top:10px;left:10px;font-family:'Poppins',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;border:2px solid var(--ink);border-radius:999px;padding:4px 10px;}
+  .selo-esgotado{background:var(--red);color:#fff;}
+  .selo-breve{background:var(--paper);color:var(--ink-soft);top:auto;bottom:10px;left:auto;right:10px;font-size:10.5px;}
+  .prato.esgotado .foto img{filter:grayscale(1) brightness(.85);}
+  .prato.esgotado .preco{background:var(--line);text-decoration:line-through;}
+
+  .estado{text-align:center;padding:50px 10px;color:var(--paper);}
+  .estado .emoji{font-size:44px;display:block;margin-bottom:8px;}
+  .estado p{margin:4px 0;font-size:14px;color:#cfc7b4;}
+  .btn{display:inline-block;margin-top:14px;background:var(--orange2);color:var(--ink);border:2px solid var(--ink);border-radius:10px;padding:12px 18px;font-family:'Titan One',cursive;font-size:15px;cursor:pointer;box-shadow:3px 3px 0 var(--paper);text-decoration:none;}
+
+  /* esqueleto enquanto carrega */
+  .esqueleto{background:#1c1c1c;border:2px solid #2a2a2a;border-radius:var(--radius);height:330px;animation:pulsa 1.2s ease-in-out infinite;}
+  @keyframes pulsa{50%{opacity:.5;}}
+
+  /* ---------- rodapé ---------- */
+  .links{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:40px 0 0;}
+  .links a{background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:10px;padding:10px 16px;font-weight:700;font-size:14px;text-decoration:none;box-shadow:3px 3px 0 var(--orange2);}
+  .links a.c-cyan{background:var(--cyan);}
+  .links a.c-red{background:var(--red);color:#fff;}
+  footer{text-align:center;padding:28px 10px 40px;font-size:12px;color:#8f887a;}
+  footer .atualizado{font-family:'IBM Plex Mono',monospace;font-size:11px;display:block;margin-bottom:6px;}
+
+  /* ---------- foto ampliada ---------- */
+  .zoom{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,0.88);display:none;align-items:center;justify-content:center;padding:18px;}
+  .zoom.aberto{display:flex;}
+  .zoom .caixa{background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:var(--radius);box-shadow:6px 6px 0 var(--orange2);max-width:720px;width:100%;max-height:100%;overflow:auto;position:relative;}
+  .zoom .caixa img{display:block;width:100%;max-height:68vh;object-fit:contain;background:#111;border-bottom:2px solid var(--ink);}
+  .zoom .info{padding:14px 18px 18px;}
+  .zoom .info h3{font-family:'Titan One',cursive;font-weight:400;font-size:24px;margin:0 0 6px;}
+  .zoom .info p{margin:0 0 6px;font-size:14px;color:var(--ink-soft);line-height:1.45;}
+  .zoom .fechar,.zoom .seta{position:absolute;z-index:2;background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:50%;width:40px;height:40px;font-size:18px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 0 var(--ink);}
+  .zoom .fechar{top:10px;right:10px;}
+  .zoom .seta{top:calc(min(68vh, 540px) / 2 - 20px);}
+  .zoom .seta.ant{left:10px;}
+  .zoom .seta.prox{right:10px;}
+
+  @media (max-width:600px){
+    .wrap{padding:0 30px;}
+    header{padding:26px 30px 4px;}
+    header .wordmark{font-size:46px;}
+    .side-wave{width:22px;}
+    .grade{grid-template-columns:1fr;gap:18px;}
+    .secao-titulo{font-size:23px;}
+    .zoom{padding:10px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;}
+    .prato .foto img{transition:none;}
+    .esqueleto{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <div class="wordmark">NAR<span class="u">U</span>Á</div>
+    <div class="eyebrow">FoodTruck · São Paulo</div>
+    <h1>Comida asiática de rua</h1>
+    <div class="aviso-exemplo" id="avisoExemplo" hidden>🚧 Cardápio de exemplo: fotos e preços reais em breve.</div>
+  </header>
+
+  <svg class="side-wave side-wave-left" viewBox="0 0 40 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <pattern id="archPatternLeft" patternUnits="userSpaceOnUse" width="40" height="180">
+        <g fill="none" stroke-linecap="round" stroke-width="6">
+          <path d="M0,6 A28,28 0 0 1 0,62" stroke="#e73334"/>
+          <path d="M0,14 A20,20 0 0 1 0,54" stroke="#e73334"/>
+          <path d="M0,22 A12,12 0 0 1 0,46" stroke="#e73334"/>
+          <path d="M0,30 A4,4 0 0 1 0,38" stroke="#e73334"/>
+          <path d="M0,54 A28,28 0 0 1 0,110" stroke="#f49140"/>
+          <path d="M0,62 A20,20 0 0 1 0,102" stroke="#f49140"/>
+          <path d="M0,70 A12,12 0 0 1 0,94" stroke="#f49140"/>
+          <path d="M0,78 A4,4 0 0 1 0,86" stroke="#f49140"/>
+          <path d="M0,102 A28,28 0 0 1 0,158" stroke="#40d5e8"/>
+          <path d="M0,110 A20,20 0 0 1 0,150" stroke="#40d5e8"/>
+          <path d="M0,118 A12,12 0 0 1 0,142" stroke="#40d5e8"/>
+          <path d="M0,126 A4,4 0 0 1 0,134" stroke="#40d5e8"/>
+        </g>
+      </pattern>
+    </defs>
+    <rect width="40" height="800" fill="url(#archPatternLeft)"/>
+  </svg>
+  <svg class="side-wave side-wave-right" viewBox="0 0 40 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <pattern id="archPatternRight" patternUnits="userSpaceOnUse" width="40" height="180">
+        <g fill="none" stroke-linecap="round" stroke-width="6">
+          <path d="M40,6 A28,28 0 0 0 40,62" stroke="#e73334"/>
+          <path d="M40,14 A20,20 0 0 0 40,54" stroke="#e73334"/>
+          <path d="M40,22 A12,12 0 0 0 40,46" stroke="#e73334"/>
+          <path d="M40,30 A4,4 0 0 0 40,38" stroke="#e73334"/>
+          <path d="M40,54 A28,28 0 0 0 40,110" stroke="#f49140"/>
+          <path d="M40,62 A20,20 0 0 0 40,102" stroke="#f49140"/>
+          <path d="M40,70 A12,12 0 0 0 40,94" stroke="#f49140"/>
+          <path d="M40,78 A4,4 0 0 0 40,86" stroke="#f49140"/>
+          <path d="M40,102 A28,28 0 0 0 40,158" stroke="#40d5e8"/>
+          <path d="M40,110 A20,20 0 0 0 40,150" stroke="#40d5e8"/>
+          <path d="M40,118 A12,12 0 0 0 40,142" stroke="#40d5e8"/>
+          <path d="M40,126 A4,4 0 0 0 40,134" stroke="#40d5e8"/>
+        </g>
+      </pattern>
+    </defs>
+    <rect width="40" height="800" fill="url(#archPatternRight)"/>
+  </svg>
+
+  <nav class="cat-nav" id="catNav" aria-label="Categorias" hidden>
+    <div class="wrap"><div class="lista" id="catLista"></div></div>
+  </nav>
+
+  <main class="wrap" id="conteudo">
+    <div class="grade" aria-hidden="true">
+      <div class="esqueleto"></div><div class="esqueleto"></div><div class="esqueleto"></div>
+    </div>
+  </main>
+
+  <div class="wrap">
+    <div class="links" id="links"></div>
+  </div>
+
+  <footer>
+    <span class="atualizado" id="atualizado"></span>
+    Desenvolvido por @Neon
+  </footer>
+
+  <div class="zoom" id="zoom" role="dialog" aria-modal="true" aria-labelledby="zoomNome">
+    <div class="caixa">
+      <button class="fechar" id="zoomFechar" type="button" aria-label="Fechar">✕</button>
+      <button class="seta ant" id="zoomAnt" type="button" aria-label="Foto anterior">‹</button>
+      <button class="seta prox" id="zoomProx" type="button" aria-label="Próxima foto">›</button>
+      <img id="zoomImg" alt="">
+      <div class="info">
+        <h3 id="zoomNome"></h3>
+        <p id="zoomDesc"></p>
+        <div class="precos" id="zoomPrecos"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ============================================================================
+// Naruá · Site do cardápio
+// Arquivo único (HTML, CSS e JS puro, sem build), igual ao app de comandas.
+// ============================================================================
+
+// O cardápio vem da aba Menu da planilha de controle, pelo Apps Script de
+// comandas (versão 4 ou mais nova, rota ?action=cardapio). É a mesma URL do
+// app. Se ficar vazia, o site mostra os DADOS_EXEMPLO lá embaixo.
+const URL_CARDAPIO = 'https://script.google.com/macros/s/AKfycbyCEC_kkgmHXvZ74xPzNZJafpy2KZ5OZUtpvb1Wa7rxPIXbJ1UHShpSiAGJeXVt1i6fEA/exec';
+
+// Links do rodapé. Deixe vazio ('') para esconder o botão.
+const LINKS = {
+  instagram: 'https://instagram.com/narua.foodtruck',
+  whatsapp: '',    // ex.: 'https://wa.me/5511999999999'
+  ifood: ''        // ex.: 'https://www.ifood.com.br/delivery/...'
+};
+
+// Mostra o preço do iFood embaixo do preço de balcão.
+const MOSTRAR_PRECO_IFOOD = true;
+
+// Pasta das fotos dentro deste repositório. No campo Foto do cardápio (app ou
+// aba Menu), escreva só o nome do arquivo (ex.: yakissoba.jpg). Também aceita
+// um link completo (https://...) ou um link de compartilhamento do Google Drive.
+const PASTA_FOTOS = 'fotos/';
+
+// Ordem das categorias na tela. Categorias que não estiverem aqui aparecem
+// depois, na ordem em que surgem na planilha.
+const ORDEM_CATEGORIAS = ['Pratos', 'Petiscos', 'Bebidas'];
+
+const EMOJI_CATEGORIA = { 'pratos': '🍜', 'petiscos': '🥟', 'bebidas': '🥤', 'sobremesas': '🍡' };
+
+// Emoji usado na foto provisória, procurado pelo nome do prato.
+const EMOJI_PRATO = [
+  ['yakissoba', '🍜'], ['lamen', '🍜'], ['karaag', '🍗'], ['frango', '🍗'], ['tempur', '🍤'],
+  ['corn dog', '🌭'], ['takoyaki', '🐙'], ['nikuman', '🥟'], ['nikkuman', '🥟'], ['guioza', '🥟'],
+  ['gyoza', '🥟'], ['shimeji', '🍄'], ['harumaki', '🌯'], ['poke', '🥗'], ['refri', '🥤'],
+  ['heineken', '🍺'], ['cerveja', '🍺'], ['agua', '💧'], ['cha', '🧋'], ['suco', '🧃'], ['mochi', '🍡']
+];
+
+// Cardápio de 17/10/2026, no mesmo formato da rota ?action=cardapio. Só
+// aparece se URL_CARDAPIO estiver vazia (para ver o site sem a planilha);
+// com a URL preenchida, vale o que estiver na aba Menu.
+const DADOS_EXEMPLO = {
+  ok: true,
+  exemplo: false,
+  itens: [
+    { nome: 'Yakissoba', tamanho: 'P', categoria: 'Pratos', descricao: 'Macarrão na chapa, legumes salteados, frango karaaguê, molho caseiro e óleo de gergelim.', preco: 25, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: false },
+    { nome: 'Yakissoba', tamanho: 'G', categoria: 'Pratos', descricao: '', preco: 40, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: false },
+    { nome: 'Big Poke 450g', categoria: 'Pratos', descricao: 'Quinoa, salmão, cream cheese, pepino, milho, cebola roxa, edamame, manga e castanha de caju.', preco: 60, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: false },
+    { nome: 'Karaaguê', categoria: 'Petiscos', descricao: 'Sobrecoxa de frango crocante marinada em gengibre, alho e saquê.', preco: 20, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: false },
+    { nome: 'Tempurá', categoria: 'Petiscos', descricao: 'Legumes soltinhos empanados em massa fina e leve.', preco: 18, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: true },
+    { nome: 'Corn dog coreano', categoria: 'Petiscos', descricao: 'Salsicha, mussarela, massa agridoce e cubinhos de batata. Com ketchup e mostarda.', preco: 18, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: false },
+    { nome: 'Takoyaki', categoria: 'Petiscos', descricao: 'Bolinho de massa de panqueca japonesa com pedaços de polvo. Acompanha molho agridoce (5 unidades).', preco: 20, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: false },
+    { nome: 'Nikkuman', categoria: 'Petiscos', descricao: '"Kung Fu Panda": pãozinho no vapor recheado de legumes e cogumelo, finalizado na chapa (3 unidades).', preco: 18, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: true },
+    { nome: 'Guioza', categoria: 'Petiscos', descricao: 'Pastel chinês recheado com legumes e carne suína, finalizado na chapa (5 unidades).', preco: 18, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: false },
+    { nome: 'Shimeji', categoria: 'Petiscos', descricao: 'Cogumelo shimeji salteado e temperado.', preco: 18, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: true },
+    { nome: 'Harumaki', categoria: 'Petiscos', descricao: 'Rolinho primavera frito de queijo ou legumes (5 unidades). Acompanha molho.', preco: 18, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: true },
+    { nome: 'Refrigerante lata', categoria: 'Bebidas', descricao: '', preco: 7, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: false },
+    { nome: 'Água mineral', categoria: 'Bebidas', descricao: '', preco: 4, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: false },
+    { nome: 'Suco natural', categoria: 'Bebidas', descricao: '', preco: 9, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: false },
+    { nome: 'Heineken', categoria: 'Bebidas', descricao: '', preco: 10, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: false },
+    { nome: 'Chá gelado 1L', categoria: 'Bebidas', descricao: '', preco: 15, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: false },
+    { nome: 'Suco importado', categoria: 'Bebidas', descricao: '', preco: 17, preco_ifood: 0, foto: '', status: 'disponivel', vegetariano: false }
+  ]
+};
+
+// ---------------------------------------------------------------------------
+// utilidades
+// ---------------------------------------------------------------------------
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+function normalizar(s){
+  return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+function reais(v){
+  const n = Number(v);
+  if (!isFinite(n) || n <= 0) return '';
+  return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+}
+function slug(s){
+  return normalizar(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'outros';
+}
+
+const CHAVE_CACHE = 'cardapio:cache';
+function lerCache(){
+  try { return JSON.parse(localStorage.getItem(CHAVE_CACHE) || 'null'); } catch (e) { return null; }
+}
+function gravarCache(dados){
+  try { localStorage.setItem(CHAVE_CACHE, JSON.stringify(dados)); } catch (e) {}
+}
+
+// Converte o que estiver no campo Foto num endereço de imagem seguro.
+function urlFoto(valor){
+  const v = String(valor || '').trim();
+  if (!v) return '';
+  const drive = v.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]{10,})/);
+  if (drive) return 'https://drive.google.com/thumbnail?id=' + drive[1] + '&sz=w1200';
+  if (/^https?:\/\//i.test(v)) return v;
+  if (/^[\w./ -]+$/.test(v) && !v.includes('..')) return PASTA_FOTOS + v.replace(/^\/+/, '');
+  return '';
+}
+
+// Foto provisória: um cartão com o emoji do prato, nas cores do Naruá.
+const CORES_PROVISORIAS = ['#f6af43', '#f49140', '#40d5e8', '#e73334'];
+function fotoProvisoria(nome, indice){
+  const n = normalizar(nome);
+  const achado = EMOJI_PRATO.find(([k]) => n.includes(k));
+  const emoji = achado ? achado[1] : '🍱';
+  const cor = CORES_PROVISORIAS[indice % CORES_PROVISORIAS.length];
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'>` +
+    `<rect width='400' height='300' fill='${cor}'/>` +
+    `<g fill='none' stroke='#181818' stroke-opacity='.12' stroke-width='10'>` +
+    `<circle cx='0' cy='300' r='90'/><circle cx='0' cy='300' r='130'/><circle cx='400' cy='0' r='90'/><circle cx='400' cy='0' r='130'/></g>` +
+    `<text x='200' y='150' font-size='130' text-anchor='middle' dominant-baseline='central'>${emoji}</text></svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+// ---------------------------------------------------------------------------
+// dados
+// ---------------------------------------------------------------------------
+
+// Junta linhas com o mesmo nome (ex.: Yakissoba P e G) num cartão só e
+// separa por categoria. Itens com status "oculto" não aparecem.
+function montarCategorias(itens){
+  const porCategoria = new Map();
+  const porNome = new Map();
+  (itens || []).forEach(it => {
+    const nome = String(it.nome || '').trim();
+    if (!nome) return;
+    const status = normalizar(it.status || 'disponivel');
+    if (status === 'oculto') return;
+    const categoria = String(it.categoria || '').trim() || 'Outros';
+    const chave = normalizar(categoria) + '|' + normalizar(nome);
+    let prato = porNome.get(chave);
+    if (!prato) {
+      prato = { nome, categoria, descricao: '', foto: '', vegetariano: false, variantes: [], esgotados: 0 };
+      porNome.set(chave, prato);
+      if (!porCategoria.has(categoria)) porCategoria.set(categoria, []);
+      porCategoria.get(categoria).push(prato);
+    }
+    if (!prato.descricao && it.descricao) prato.descricao = String(it.descricao);
+    if (!prato.foto && it.foto) prato.foto = urlFoto(it.foto);
+    if (it.vegetariano === true) prato.vegetariano = true;
+    const esgotado = status === 'esgotado';
+    if (esgotado) prato.esgotados++;
+    prato.variantes.push({ tamanho: String(it.tamanho || '').trim(), preco: Number(it.preco) || 0, preco_ifood: Number(it.preco_ifood) || 0, esgotado });
+  });
+  porNome.forEach(p => { p.esgotado = p.esgotados > 0 && p.esgotados === p.variantes.length; });
+
+  const ordem = ORDEM_CATEGORIAS.map(normalizar);
+  return [...porCategoria.entries()]
+    .map(([nome, pratos], i) => ({ nome, pratos, pos: ordem.indexOf(normalizar(nome)) < 0 ? 100 + i : ordem.indexOf(normalizar(nome)) }))
+    .sort((a, b) => a.pos - b.pos);
+}
+
+async function buscarCardapio(){
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const resp = await fetch(URL_CARDAPIO + (URL_CARDAPIO.includes('?') ? '&' : '?') + 'action=cardapio', { cache: 'no-store', signal: ctrl.signal });
+    const dados = await resp.json();
+    if (!dados || dados.ok !== true || !Array.isArray(dados.itens)) throw new Error('resposta inesperada');
+    return dados;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// tela
+// ---------------------------------------------------------------------------
+let PRATOS_COM_ZOOM = [];
+
+function htmlPrecos(prato){
+  const varias = prato.variantes.length > 1;
+  let html = prato.variantes.map(v => {
+    const valor = reais(v.preco);
+    if (!valor) return '';
+    const tam = varias && v.tamanho ? `<span class="tam">${esc(v.tamanho)}</span>` : '';
+    return `<span class="preco"${v.esgotado ? ' title="Esgotado"' : ''}>${tam}${valor}</span>`;
+  }).join('');
+  if (MOSTRAR_PRECO_IFOOD) {
+    const ifood = prato.variantes.map(v => {
+      const valor = reais(v.preco_ifood);
+      return valor ? (varias && v.tamanho ? v.tamanho + ' ' : '') + valor : '';
+    }).filter(Boolean);
+    if (ifood.length) html += `<span class="preco-ifood">No iFood: ${esc(ifood.join(' · '))}</span>`;
+  }
+  return html;
+}
+
+function render(dados){
+  const categorias = montarCategorias(dados.itens);
+  const main = document.getElementById('conteudo');
+  document.getElementById('avisoExemplo').hidden = !dados.exemplo;
+
+  if (!categorias.length) {
+    main.innerHTML = `<div class="estado"><span class="emoji">🍜</span><p>O cardápio está sendo preparado. Volte daqui a pouco!</p></div>`;
+    document.getElementById('catNav').hidden = true;
+    return;
+  }
+
+  PRATOS_COM_ZOOM = [];
+  let indice = 0;
+  main.innerHTML = categorias.map(cat => {
+    const emoji = EMOJI_CATEGORIA[normalizar(cat.nome)] || '🍱';
+    const cartoes = cat.pratos.map(p => {
+      const i = indice++;
+      const provisoria = !p.foto;
+      p.src = p.foto || fotoProvisoria(p.nome, i);
+      p.provisoria = provisoria;
+      p.zoomIdx = PRATOS_COM_ZOOM.push(p) - 1;
+      return `
+        <article class="prato${p.esgotado ? ' esgotado' : ''}">
+          <button class="foto" type="button" data-zoom="${p.zoomIdx}" aria-label="Ver foto de ${esc(p.nome)}">
+            <img src="${esc(p.src)}" alt="${esc(p.nome)}" loading="lazy" decoding="async" data-prov="${esc(fotoProvisoria(p.nome, i))}">
+            ${p.esgotado ? '<span class="selo selo-esgotado">Esgotado</span>' : ''}
+            ${provisoria ? '<span class="selo selo-breve">📷 foto em breve</span>' : ''}
+          </button>
+          <div class="corpo">
+            <h3>${esc(p.nome)}</h3>
+            ${p.vegetariano ? '<span class="tag-veg">🌱 Vegetariano</span>' : ''}
+            ${p.descricao ? `<p class="desc">${esc(p.descricao)}</p>` : ''}
+            <div class="precos">${htmlPrecos(p)}</div>
+          </div>
+        </article>`;
+    }).join('');
+    return `
+      <section class="secao" id="cat-${slug(cat.nome)}" data-cat="${esc(cat.nome)}">
+        <h2 class="secao-titulo"><span class="emoji">${emoji}</span>${esc(cat.nome)}</h2>
+        <div class="grade">${cartoes}</div>
+      </section>`;
+  }).join('');
+
+  // Se a foto real não carregar, cai para a provisória.
+  main.querySelectorAll('img[data-prov]').forEach(img => {
+    img.addEventListener('error', () => {
+      if (img.src !== img.dataset.prov) img.src = img.dataset.prov;
+    }, { once: true });
+  });
+
+  renderNav(categorias);
+}
+
+function renderNav(categorias){
+  const nav = document.getElementById('catNav');
+  const lista = document.getElementById('catLista');
+  nav.hidden = categorias.length < 2;
+  lista.innerHTML = categorias.map(c =>
+    `<button class="chip" type="button" data-alvo="cat-${slug(c.nome)}">${EMOJI_CATEGORIA[normalizar(c.nome)] || '🍱'} ${esc(c.nome)}</button>`
+  ).join('');
+  lista.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => {
+    document.getElementById(chip.dataset.alvo).scrollIntoView();
+  }));
+
+  if (!('IntersectionObserver' in window)) return;
+  if (window._obsCat) window._obsCat.disconnect();
+  const marcar = id => lista.querySelectorAll('.chip').forEach(ch => {
+    const ativo = ch.dataset.alvo === id;
+    ch.classList.toggle('ativo', ativo);
+    if (ativo) ch.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  });
+  window._obsCat = new IntersectionObserver(entradas => {
+    entradas.forEach(e => { if (e.isIntersecting) marcar(e.target.id); });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  document.querySelectorAll('.secao').forEach(s => window._obsCat.observe(s));
+  marcar('cat-' + slug(categorias[0].nome));
+}
+
+function renderLinks(){
+  const botoes = [];
+  if (LINKS.instagram) botoes.push(`<a href="${esc(LINKS.instagram)}" target="_blank" rel="noopener">📸 Instagram</a>`);
+  if (LINKS.whatsapp) botoes.push(`<a class="c-cyan" href="${esc(LINKS.whatsapp)}" target="_blank" rel="noopener">💬 WhatsApp</a>`);
+  if (LINKS.ifood) botoes.push(`<a class="c-red" href="${esc(LINKS.ifood)}" target="_blank" rel="noopener">🛵 Peça no iFood</a>`);
+  document.getElementById('links').innerHTML = botoes.join('');
+}
+
+function renderAtualizado(dados){
+  document.getElementById('atualizado').textContent = dados.atualizado ? 'Cardápio atualizado em ' + dados.atualizado : '';
+}
+
+function renderErro(){
+  document.getElementById('conteudo').innerHTML = `
+    <div class="estado">
+      <span class="emoji">😵</span>
+      <p>Não conseguimos carregar o cardápio agora.</p>
+      <p>Confira sua internet e tente de novo.</p>
+      <button class="btn" type="button" id="tentarDeNovo">Tentar de novo</button>
+    </div>`;
+  document.getElementById('tentarDeNovo').addEventListener('click', iniciar);
+}
+
+// ---------------------------------------------------------------------------
+// foto ampliada
+// ---------------------------------------------------------------------------
+let zoomAtual = -1;
+const zoom = document.getElementById('zoom');
+let focoAntes = null;
+
+function abrirZoom(i){
+  const p = PRATOS_COM_ZOOM[i];
+  if (!p) return;
+  if (zoomAtual < 0) focoAntes = document.activeElement;
+  zoomAtual = i;
+  const img = document.getElementById('zoomImg');
+  img.onerror = () => { img.onerror = null; img.src = fotoProvisoria(p.nome, i); };
+  img.src = p.src;
+  img.alt = p.nome;
+  document.getElementById('zoomNome').textContent = p.nome + (p.vegetariano ? ' 🌱' : '') + (p.esgotado ? ' · esgotado' : '');
+  const desc = document.getElementById('zoomDesc');
+  desc.textContent = p.descricao || '';
+  desc.hidden = !p.descricao;
+  document.getElementById('zoomPrecos').innerHTML = htmlPrecos(p);
+  const varios = PRATOS_COM_ZOOM.length > 1;
+  document.getElementById('zoomAnt').hidden = !varios;
+  document.getElementById('zoomProx').hidden = !varios;
+  zoom.classList.add('aberto');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('zoomFechar').focus();
+}
+function fecharZoom(){
+  zoom.classList.remove('aberto');
+  document.body.style.overflow = '';
+  zoomAtual = -1;
+  if (focoAntes) focoAntes.focus();
+}
+function passarZoom(delta){
+  const n = PRATOS_COM_ZOOM.length;
+  abrirZoom((zoomAtual + delta + n) % n);
+}
+
+document.getElementById('conteudo').addEventListener('click', e => {
+  const alvo = e.target.closest('[data-zoom]');
+  if (alvo) abrirZoom(Number(alvo.dataset.zoom));
+});
+document.getElementById('zoomFechar').addEventListener('click', fecharZoom);
+document.getElementById('zoomAnt').addEventListener('click', () => passarZoom(-1));
+document.getElementById('zoomProx').addEventListener('click', () => passarZoom(1));
+zoom.addEventListener('click', e => { if (e.target === zoom) fecharZoom(); });
+document.addEventListener('keydown', e => {
+  if (zoomAtual < 0) return;
+  if (e.key === 'Escape') fecharZoom();
+  else if (e.key === 'ArrowLeft') passarZoom(-1);
+  else if (e.key === 'ArrowRight') passarZoom(1);
+});
+// arrastar para o lado no celular troca de foto
+let toqueX = null;
+zoom.addEventListener('touchstart', e => { toqueX = e.touches[0].clientX; }, { passive: true });
+zoom.addEventListener('touchend', e => {
+  if (toqueX == null) return;
+  const dx = e.changedTouches[0].clientX - toqueX;
+  toqueX = null;
+  if (Math.abs(dx) > 60) passarZoom(dx < 0 ? 1 : -1);
+});
+
+// ---------------------------------------------------------------------------
+// início: mostra o último cardápio guardado no aparelho na hora e atualiza
+// pela planilha em seguida.
+// ---------------------------------------------------------------------------
+async function iniciar(){
+  renderLinks();
+  if (!URL_CARDAPIO) {
+    render(DADOS_EXEMPLO);
+    return;
+  }
+  const cache = lerCache();
+  if (cache) { render(cache); renderAtualizado(cache); }
+  try {
+    const dados = await buscarCardapio();
+    gravarCache(dados);
+    // não redesenha com a foto aberta, para não fechar o que a pessoa está vendo
+    if (zoomAtual < 0) { render(dados); renderAtualizado(dados); }
+  } catch (err) {
+    console.warn('cardápio: falha ao buscar da planilha', err);
+    if (!cache) renderErro();
+  }
+}
+
+iniciar();
+</script>
+</body>
+</html>
