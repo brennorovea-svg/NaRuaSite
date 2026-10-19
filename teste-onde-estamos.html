@@ -759,9 +759,14 @@ const urlComoChegar = ev => 'https://www.google.com/maps/dir/?api=1&destination=
 const urlAbrirMapa = ev => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(pontoMapa(ev));
 
 // Separa a agenda em: evento de hoje ainda aberto, próximo evento e os demais.
+function maiuscula(s){
+  s = String(s || '').trim();
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+}
 function organizarAgenda(dados){
   const agora = agoraSP();
   const eventos = (dados && Array.isArray(dados.eventos) ? dados.eventos : [])
+    .map(ev => ev ? Object.assign({}, ev, { evento: maiuscula(ev.evento), local: maiuscula(ev.local) }) : ev)
     .filter(ev => ev && /^\d{4}-\d{2}-\d{2}$/.test(String(ev.data || '')) && (ev.local || ev.evento))
     .filter(ev => ev.data > agora.data || (ev.data === agora.data && !(ev.fim && hora(ev.fim) && String(ev.fim).slice(0, 5) <= agora.hora)))
     .sort((a, b) => (a.data + (a.inicio || '')).localeCompare(b.data + (b.inicio || '')));
@@ -842,7 +847,7 @@ function agendaDemo(tipo){
   ];
   if (tipo === 'nada') return { ok: true, eventos: [] };
   if (tipo === 'proximo') return { ok: true, eventos: futuros };
-  return { ok: true, eventos: [ev(hoje, 'Feira do Ibirapuera', 'Parque Ibirapuera', 'Portão 3, Av. Pedro Álvares Cabral, São Paulo', -23.5874, -46.6576, '11:00', '', 'Estamos ao lado do portão 3, perto do lago.')].concat(futuros) };
+  return { ok: true, eventos: [ev(hoje, '', '7 de setembro', 'Av. Sete de Setembro, 45, Franco da Rocha - SP', null, null, '', '')].concat(futuros) };
 }
 
 async function buscarAgenda(){
@@ -863,7 +868,7 @@ async function iniciarAgenda(){
   if (demo) {
     const aviso = document.getElementById('avisoDemo');
     aviso.hidden = false;
-    aviso.textContent = '🧪 Página de teste com agenda de exemplo (' + demo + '). Locais e horários fictícios.';
+    aviso.textContent = '🧪 Página de teste com agenda de exemplo (' + demo + '). Só o endereço da 7 de setembro é real; datas e os outros locais são fictícios.';
     renderAgenda(agendaDemo(demo));
     return;
   }
