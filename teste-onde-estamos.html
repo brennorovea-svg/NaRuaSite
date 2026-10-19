@@ -119,6 +119,7 @@
   .zoom .seta.ant{left:10px;}
   .zoom .seta.prox{right:10px;}
 
+  [hidden]{display:none !important;}
   /* ---------- tela inicial (mesma cara do menu do app) ---------- */
   .tela{padding-top:18px;}
   .home{max-width:520px;margin:0 auto;padding-top:22px;}
@@ -332,7 +333,7 @@ const LINKS = {
 // ?action=agenda do mesmo Apps Script (só eventos Confirmados e com
 // "Mostrar no site" = Sim; nunca dados de venda). O mapa é o embed simples do
 // Google Maps, sem chave. Para testar sem a planilha, abra o site com
-// ?demo=hoje, ?demo=proximo ou ?demo=nada.
+// ?demo=semana, ?demo=hoje ou ?demo=nada.
 const FUSO = 'America/Sao_Paulo';
 const MAX_PROXIMOS = 3;
 
@@ -837,17 +838,28 @@ function renderAgenda(dados){
   caixa.innerHTML = html;
 }
 
-// Agenda de exemplo para testar sem a planilha (?demo=hoje|proximo|nada).
+// Agenda de exemplo para testar sem a planilha (?demo=semana|hoje|nada).
+// "semana" usa a agenda fixa real (quinta em Caieiras, sábado na 7 de
+// setembro), repetida toda semana como a planilha vai fazer; "hoje" finge que
+// hoje é dia de 7 de setembro.
+const AGENDA_FIXA_DEMO = [
+  { dia_semana: 4, evento: '', local: 'Caieiras', endereco: 'Ver. Bento Rodrigues, Nova Caieiras, Caieiras - SP, 07700-000' },
+  { dia_semana: 6, evento: '', local: '7 de setembro', endereco: 'Av. Sete de Setembro, 45, Franco da Rocha - SP' }
+];
 function agendaDemo(tipo){
   const hoje = agoraSP().data;
-  const ev = (data, evento, local, endereco, lat, lng, inicio, fim, aviso) => ({ data, inicio, fim, evento, local, endereco, lat, lng, aviso: aviso || '' });
-  const futuros = [
-    ev(somarDias(hoje, 2), 'Feira Gastronômica da Vila', 'Vila Madalena', 'Praça Benedito Calixto, Pinheiros, São Paulo', -23.5592, -46.6829, '11:00', '19:00'),
-    ev(somarDias(hoje, 6), 'Food Park Villa-Lobos', 'Parque Villa-Lobos', 'Av. Prof. Fonseca Rodrigues, 2001, Alto de Pinheiros, São Paulo', -23.5465, -46.7225, '12:00', '18:00')
-  ];
   if (tipo === 'nada') return { ok: true, eventos: [] };
-  if (tipo === 'proximo') return { ok: true, eventos: futuros };
-  return { ok: true, eventos: [ev(hoje, '', '7 de setembro', 'Av. Sete de Setembro, 45, Franco da Rocha - SP', null, null, '', '')].concat(futuros) };
+  const eventos = [];
+  for (let n = 0; n < 21; n++) {
+    const data = somarDias(hoje, n);
+    const dia = new Date(data + 'T12:00:00Z').getUTCDay();
+    AGENDA_FIXA_DEMO.filter(f => f.dia_semana === dia).forEach(f => eventos.push({ data, inicio: '', fim: '', evento: f.evento, local: f.local, endereco: f.endereco, lat: null, lng: null, aviso: '' }));
+  }
+  if (tipo === 'hoje' && !eventos.some(ev => ev.data === hoje)) {
+    const f = AGENDA_FIXA_DEMO[1];
+    eventos.unshift({ data: hoje, inicio: '', fim: '', evento: '', local: f.local, endereco: f.endereco, lat: null, lng: null, aviso: '' });
+  }
+  return { ok: true, eventos };
 }
 
 async function buscarAgenda(){
@@ -868,7 +880,7 @@ async function iniciarAgenda(){
   if (demo) {
     const aviso = document.getElementById('avisoDemo');
     aviso.hidden = false;
-    aviso.textContent = '🧪 Página de teste com agenda de exemplo (' + demo + '). Só o endereço da 7 de setembro é real; datas e os outros locais são fictícios.';
+    aviso.textContent = '🧪 Página de teste (' + demo + '): agenda fixa de quinta e sábado, ainda sem horário' + (demo === 'hoje' ? '; finge que hoje é dia de 7 de setembro' : '') + '.';
     renderAgenda(agendaDemo(demo));
     return;
   }
