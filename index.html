@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0d0d0d">
-<meta name="description" content="Cardápio do Narua, food truck de comida asiática de rua em São Paulo. Veja as fotos dos pratos e os preços.">
-<meta property="og:title" content="Narua · Cardápio">
-<meta property="og:description" content="Comida asiática de rua em São Paulo. Veja as fotos dos pratos e os preços.">
+<meta name="description" content="Narua, food truck de comida asiática de rua em São Paulo. Veja o cardápio com fotos e preços e onde o food truck está hoje.">
+<meta property="og:title" content="Narua · Comida asiática de rua">
+<meta property="og:description" content="Cardápio com fotos e preços e onde o food truck está hoje.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%9C%3C/text%3E%3C/svg%3E">
-<title>Narua · Cardápio</title>
+<title>Narua · Comida asiática de rua</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Titan+One&family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -119,8 +119,64 @@
   .zoom .seta.ant{left:10px;}
   .zoom .seta.prox{right:10px;}
 
+  [hidden]{display:none !important;}
+  /* ---------- tela inicial (mesma cara do menu do app) ---------- */
+  .tela{padding-top:18px;}
+  .home{max-width:520px;margin:0 auto;padding-top:22px;}
+  .home-grid{display:flex;flex-direction:column;gap:14px;}
+  .home-card{border:2px solid var(--ink);border-radius:var(--radius);padding:18px 20px;box-shadow:5px 5px 0 rgba(0,0,0,0.35);text-align:left;cursor:pointer;font-family:'Poppins',sans-serif;display:flex;align-items:center;gap:14px;width:100%;text-decoration:none;transition:transform .1s ease,box-shadow .1s ease;}
+  .home-card:hover{transform:translate(1px,1px);box-shadow:3px 3px 0 rgba(0,0,0,0.35);}
+  .home-card:focus-visible{outline:3px solid var(--paper);outline-offset:3px;}
+  .home-card .icon{font-size:26px;flex-shrink:0;}
+  .home-card .title{font-family:'Titan One',cursive;font-size:17px;flex:1;}
+  .home-card .sub{display:block;font-family:'Poppins',sans-serif;font-weight:600;font-size:12px;opacity:.8;margin-top:2px;}
+  .home-card.c-yellow{background:var(--orange);color:var(--ink);}
+  .home-card.c-orange{background:var(--orange2);color:var(--ink);}
+  .home-card.c-cyan{background:var(--cyan);color:var(--ink);}
+  .home-card.c-red{background:var(--red);color:#fff;}
+  .home-card.c-green{background:var(--green);color:#fff;}
+
+  .faixa-hoje{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 18px;background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:var(--radius);box-shadow:5px 5px 0 var(--cyan);padding:14px 16px;text-align:left;cursor:pointer;font-family:'Poppins',sans-serif;}
+  .faixa-hoje .pino{font-size:28px;flex-shrink:0;}
+  .faixa-hoje .rotulo{display:block;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#0f7f8c;}
+  .faixa-hoje .onde{display:block;font-family:'Titan One',cursive;font-size:19px;line-height:1.15;margin-top:2px;}
+  .faixa-hoje .quando{display:block;font-size:13px;color:var(--ink-soft);margin-top:2px;}
+  .faixa-hoje .ir{font-weight:800;font-size:22px;flex-shrink:0;}
+
+  .voltar{background:none;border:2px solid var(--paper);border-radius:8px;color:var(--paper);font-family:'Poppins',sans-serif;font-weight:600;font-size:12.5px;padding:8px 14px;cursor:pointer;margin:2px 0 6px;display:inline-flex;align-items:center;gap:6px;}
+  .voltar:hover{background:var(--orange);border-color:var(--orange);color:var(--ink);}
+
+  /* ---------- onde estamos ---------- */
+  .local{background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:var(--radius);box-shadow:5px 5px 0 rgba(64,213,232,0.6);overflow:hidden;margin-top:14px;}
+  .local .topo{padding:16px 18px 14px;}
+  .local .rotulo{font-weight:800;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:#0f7f8c;}
+  .local h2{font-family:'Titan One',cursive;font-weight:400;font-size:26px;line-height:1.1;margin:4px 0 6px;}
+  .local .linha{font-size:14px;color:var(--ink-soft);margin:2px 0;line-height:1.4;}
+  .local .linha b{color:var(--ink);}
+  .local .aviso{margin-top:10px;background:#fff6ea;border:2px solid var(--orange2);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;color:#8a5a12;}
+  .mapa{display:block;width:100%;height:340px;border:0;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);background:#e9e4d6;}
+  .local .acoes{display:flex;flex-wrap:wrap;gap:10px;padding:14px 18px 18px;}
+  .local .acoes a{background:var(--orange);color:var(--ink);border:2px solid var(--ink);border-radius:10px;padding:11px 16px;font-family:'Titan One',cursive;font-size:15px;text-decoration:none;box-shadow:3px 3px 0 var(--ink);}
+  .local .acoes a.sec{background:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;}
+  .proximos{margin-top:26px;}
+  .proximos h3{font-family:'Titan One',cursive;font-weight:400;font-size:20px;margin:0 0 10px;}
+  .proximos ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+  .proximos li{background:#1c1c1c;border:2px solid #333;border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center;}
+  .proximos .dia{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;color:var(--orange);min-width:84px;text-transform:capitalize;}
+  .proximos .nome{font-weight:700;font-size:14px;}
+  .proximos .end{font-size:12.5px;color:#a9a294;}
+  .proximos a{color:var(--cyan);font-size:12.5px;font-weight:600;margin-left:auto;white-space:nowrap;}
+  .sem-evento{text-align:center;padding:34px 18px 28px;}
+  .sem-evento .emoji{font-size:44px;display:block;margin-bottom:6px;}
+  .sem-evento p{margin:4px 0;font-size:14px;color:var(--ink-soft);}
+  .aviso-demo{margin:0 0 14px;background:#2a1f0d;border:2px dashed var(--orange);color:var(--orange);border-radius:10px;padding:8px 12px;font-size:12.5px;font-weight:600;text-align:center;}
+
   @media (max-width:600px){
     .wrap{padding:0 30px;}
+    .mapa{height:280px;}
+    .local h2{font-size:23px;}
+    .proximos li{flex-wrap:wrap;}
+    .proximos a{margin-left:0;}
     header{padding:26px 30px 4px;}
     header .wordmark{font-size:46px;}
     .side-wave{width:22px;}
@@ -187,6 +243,40 @@
     <rect width="40" height="800" fill="url(#archPatternRight)"/>
   </svg>
 
+  <!-- tela inicial -->
+  <main class="wrap tela" id="telaInicio">
+    <div class="home">
+      <div class="aviso-demo" id="avisoDemo" hidden></div>
+      <button class="faixa-hoje" id="faixaHoje" type="button" data-ir="onde-estamos" hidden>
+        <span class="pino">📍</span>
+        <span style="flex:1;">
+          <span class="rotulo">Hoje estamos em</span>
+          <span class="onde" id="faixaOnde"></span>
+          <span class="quando" id="faixaQuando"></span>
+        </span>
+        <span class="ir">›</span>
+      </button>
+      <div class="home-grid" id="homeGrid">
+        <button class="home-card c-yellow" type="button" data-ir="cardapio">
+          <span class="icon">🍜</span>
+          <span class="title">Cardápio<span class="sub">Fotos dos pratos e preços</span></span>
+        </button>
+        <button class="home-card c-cyan" type="button" data-ir="onde-estamos">
+          <span class="icon">📍</span>
+          <span class="title">Onde estamos<span class="sub" id="homeOndeSub">Onde o food truck está hoje</span></span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- onde estamos -->
+  <main class="wrap tela" id="telaOnde" hidden>
+    <button class="voltar" type="button" data-ir="">← Início</button>
+    <div id="ondeConteudo"></div>
+  </main>
+
+  <div id="telaCardapio" hidden>
+  <div class="wrap tela"><button class="voltar" type="button" data-ir="">← Início</button></div>
   <nav class="cat-nav" id="catNav" aria-label="Categorias" hidden>
     <div class="wrap"><div class="lista" id="catLista"></div></div>
   </nav>
@@ -199,6 +289,7 @@
 
   <div class="wrap">
     <div class="links" id="links"></div>
+  </div>
   </div>
 
   <footer>
@@ -237,6 +328,14 @@ const LINKS = {
   whatsapp: '',    // ex.: 'https://wa.me/5511999999999'
   ifood: ''        // ex.: 'https://www.ifood.com.br/delivery/...'
 };
+
+// "Onde estamos": a agenda vem da aba Eventos da planilha, pela rota
+// ?action=agenda do mesmo Apps Script (só eventos Confirmados e com
+// "Mostrar no site" = Sim; nunca dados de venda). O mapa é o embed simples do
+// Google Maps, sem chave. Para testar sem a planilha, abra o site com
+// ?demo=semana, ?demo=hoje ou ?demo=nada.
+const FUSO = 'America/Sao_Paulo';
+const MAX_PROXIMOS = 3;
 
 // Mostra o preço do iFood embaixo do preço de balcão.
 const MOSTRAR_PRECO_IFOOD = true;
@@ -492,6 +591,14 @@ function renderNav(categorias){
 }
 
 function renderLinks(){
+  const cartoes = [];
+  if (LINKS.instagram) cartoes.push(`<a class="home-card c-red" href="${esc(LINKS.instagram)}" target="_blank" rel="noopener"><span class="icon">📸</span><span class="title">Instagram<span class="sub">@narua.foodtruck</span></span></a>`);
+  if (LINKS.whatsapp) cartoes.push(`<a class="home-card c-green" href="${esc(LINKS.whatsapp)}" target="_blank" rel="noopener"><span class="icon">💬</span><span class="title">WhatsApp</span></a>`);
+  if (LINKS.ifood) cartoes.push(`<a class="home-card c-orange" href="${esc(LINKS.ifood)}" target="_blank" rel="noopener"><span class="icon">🛵</span><span class="title">Peça no iFood</span></a>`);
+  const grade = document.getElementById('homeGrid');
+  grade.querySelectorAll('a.home-card').forEach(a => a.remove());
+  grade.insertAdjacentHTML('beforeend', cartoes.join(''));
+
   const botoes = [];
   if (LINKS.instagram) botoes.push(`<a href="${esc(LINKS.instagram)}" target="_blank" rel="noopener">📸 Instagram</a>`);
   if (LINKS.whatsapp) botoes.push(`<a class="c-cyan" href="${esc(LINKS.whatsapp)}" target="_blank" rel="noopener">💬 WhatsApp</a>`);
@@ -578,11 +685,222 @@ zoom.addEventListener('touchend', e => {
 });
 
 // ---------------------------------------------------------------------------
+// telas: início, cardápio e onde estamos. O endereço guarda a tela
+// (#cardapio, #onde-estamos), então o botão voltar do celular funciona e dá
+// para mandar o link direto, ex.: naruafoodtruck.com.br/#onde-estamos
+// ---------------------------------------------------------------------------
+const TELAS = { '': 'telaInicio', 'cardapio': 'telaCardapio', 'onde-estamos': 'telaOnde' };
+const TITULOS = { '': 'Narua · Comida asiática de rua', 'cardapio': 'Narua · Cardápio', 'onde-estamos': 'Narua · Onde estamos' };
+
+function mostrarTela(){
+  let nome = location.hash.replace(/^#/, '');
+  if (!(nome in TELAS)) nome = '';
+  Object.entries(TELAS).forEach(([k, id]) => { document.getElementById(id).hidden = k !== nome; });
+  document.title = TITULOS[nome];
+  if (nome === 'cardapio' && window._obsCat) {
+    // recalcula o chip ativo agora que a tela está visível
+    document.querySelectorAll('.secao').forEach(s => { window._obsCat.unobserve(s); window._obsCat.observe(s); });
+  }
+  window.scrollTo(0, 0);
+}
+function irPara(nome){
+  if (location.hash.replace(/^#/, '') === nome) { mostrarTela(); return; }
+  if (nome) location.hash = nome;
+  else history.pushState('', document.title, location.pathname + location.search);
+  mostrarTela();
+}
+window.addEventListener('hashchange', mostrarTela);
+window.addEventListener('popstate', mostrarTela);
+document.addEventListener('click', e => {
+  const alvo = e.target.closest('[data-ir]');
+  if (alvo) irPara(alvo.dataset.ir);
+});
+
+// ---------------------------------------------------------------------------
+// agenda (onde estamos)
+// ---------------------------------------------------------------------------
+
+// Data e hora de agora no fuso de São Paulo, como texto: '2026-10-19', '14:05'.
+function agoraSP(){
+  const p = {};
+  new Intl.DateTimeFormat('en-CA', { timeZone: FUSO, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+    .formatToParts(new Date()).forEach(x => { p[x.type] = x.value; });
+  return { data: `${p.year}-${p.month}-${p.day}`, hora: `${p.hour}:${p.minute}` };
+}
+function somarDias(data, n){
+  const d = new Date(data + 'T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function hora(h){
+  const m = String(h || '').match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return '';
+  return m[2] === '00' ? Number(m[1]) + 'h' : Number(m[1]) + 'h' + m[2];
+}
+function horario(ev){
+  const i = hora(ev.inicio), f = hora(ev.fim);
+  if (i && f) return `das ${i} às ${f}`;
+  if (i) return `a partir das ${i}`;
+  return '';
+}
+function diaPorExtenso(data, hoje){
+  if (data === hoje) return 'hoje';
+  if (data === somarDias(hoje, 1)) return 'amanhã';
+  const d = new Date(data + 'T12:00:00Z');
+  return d.toLocaleDateString('pt-BR', { timeZone: 'UTC', weekday: 'long', day: '2-digit', month: '2-digit' }).replace('-feira', '');
+}
+// Ponto do mapa: coordenadas se houver, senão o endereço, senão o nome do local.
+function pontoMapa(ev){
+  const lat = Number(ev.lat), lng = Number(ev.lng);
+  if (isFinite(lat) && isFinite(lng) && (lat || lng)) return lat + ',' + lng;
+  return [ev.endereco, ev.local].filter(Boolean).join(', ') || ev.evento || '';
+}
+const urlMapa = ev => 'https://maps.google.com/maps?q=' + encodeURIComponent(pontoMapa(ev)) + '&z=16&hl=pt-BR&output=embed';
+const urlComoChegar = ev => 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(pontoMapa(ev));
+const urlAbrirMapa = ev => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(pontoMapa(ev));
+
+// Separa a agenda em: evento de hoje ainda aberto, próximo evento e os demais.
+function maiuscula(s){
+  s = String(s || '').trim();
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+}
+function organizarAgenda(dados){
+  const agora = agoraSP();
+  const eventos = (dados && Array.isArray(dados.eventos) ? dados.eventos : [])
+    .map(ev => ev ? Object.assign({}, ev, { evento: maiuscula(ev.evento), local: maiuscula(ev.local) }) : ev)
+    .filter(ev => ev && /^\d{4}-\d{2}-\d{2}$/.test(String(ev.data || '')) && (ev.local || ev.evento))
+    .filter(ev => ev.data > agora.data || (ev.data === agora.data && !(ev.fim && hora(ev.fim) && String(ev.fim).slice(0, 5) <= agora.hora)))
+    .sort((a, b) => (a.data + (a.inicio || '')).localeCompare(b.data + (b.inicio || '')));
+  const hoje = eventos.find(ev => ev.data === agora.data) || null;
+  const resto = eventos.filter(ev => ev !== hoje);
+  return { hojeData: agora.data, hoje, proximo: hoje ? null : (resto[0] || null), seguintes: resto.slice(hoje ? 0 : 1, (hoje ? 0 : 1) + MAX_PROXIMOS) };
+}
+
+function htmlLocal(ev, rotulo, hoje){
+  const nome = ev.evento && ev.local && normalizar(ev.evento) !== normalizar(ev.local) ? `${ev.evento}` : (ev.evento || ev.local);
+  const sub = ev.evento && ev.local && normalizar(ev.evento) !== normalizar(ev.local) ? ev.local : '';
+  const quando = (ev.data === hoje ? 'Hoje' : diaPorExtenso(ev.data, hoje).replace(/^./, c => c.toUpperCase())) + (horario(ev) ? ', ' + horario(ev) : '');
+  return `
+    <article class="local">
+      <div class="topo">
+        <div class="rotulo">${esc(rotulo)}</div>
+        <h2>${esc(nome)}</h2>
+        ${sub ? `<p class="linha"><b>${esc(sub)}</b></p>` : ''}
+        <p class="linha">🕒 ${esc(quando)}</p>
+        ${ev.endereco ? `<p class="linha">📍 ${esc(ev.endereco)}</p>` : ''}
+        ${ev.aviso ? `<div class="aviso">${esc(ev.aviso)}</div>` : ''}
+      </div>
+      <iframe class="mapa" src="${esc(urlMapa(ev))}" title="Mapa: ${esc(nome)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      <div class="acoes">
+        <a href="${esc(urlComoChegar(ev))}" target="_blank" rel="noopener">🧭 Como chegar</a>
+        <a class="sec" href="${esc(urlAbrirMapa(ev))}" target="_blank" rel="noopener">Abrir no Google Maps</a>
+      </div>
+    </article>`;
+}
+
+function renderAgenda(dados){
+  const faixa = document.getElementById('faixaHoje');
+  const caixa = document.getElementById('ondeConteudo');
+  const sub = document.getElementById('homeOndeSub');
+  const insta = LINKS.instagram ? `<a class="btn" href="${esc(LINKS.instagram)}" target="_blank" rel="noopener">📸 Ver no Instagram</a>` : '';
+
+  if (!dados) {
+    faixa.hidden = true;
+    sub.textContent = 'Onde o food truck está hoje';
+    caixa.innerHTML = `<article class="local"><div class="sem-evento"><span class="emoji">📍</span><p>Não conseguimos carregar a agenda agora.</p><p>A programação também sai no nosso Instagram.</p>${insta}</div></article>`;
+    return;
+  }
+
+  const ag = organizarAgenda(dados);
+  if (ag.hoje) {
+    faixa.hidden = false;
+    document.getElementById('faixaOnde').textContent = ag.hoje.local || ag.hoje.evento;
+    document.getElementById('faixaQuando').textContent = [ag.hoje.evento && ag.hoje.evento !== ag.hoje.local ? ag.hoje.evento : '', horario(ag.hoje)].filter(Boolean).join(' · ');
+    sub.textContent = 'Hoje: ' + (ag.hoje.local || ag.hoje.evento);
+  } else {
+    faixa.hidden = true;
+    sub.textContent = ag.proximo ? 'Próximo: ' + diaPorExtenso(ag.proximo.data, ag.hojeData) + ', ' + (ag.proximo.local || ag.proximo.evento) : 'Agenda e localização';
+  }
+
+  let html = '';
+  if (ag.hoje) html += htmlLocal(ag.hoje, 'Hoje estamos em', ag.hojeData);
+  else if (ag.proximo) html += `<p class="linha" style="margin:10px 0 0;color:#cfc7b4;font-size:14px;">Hoje o food truck não está na rua. Nosso próximo evento:</p>` + htmlLocal(ag.proximo, 'Próximo evento', ag.hojeData);
+  else html += `<article class="local"><div class="sem-evento"><span class="emoji">🚚</span><p><b>Hoje o food truck não está na rua.</b></p><p>Os próximos eventos saem aqui e no nosso Instagram.</p>${insta}</div></article>`;
+
+  if (ag.seguintes.length) {
+    html += `<section class="proximos"><h3>Próximos eventos</h3><ul>` + ag.seguintes.map(ev => `
+      <li>
+        <span class="dia">${esc(diaPorExtenso(ev.data, ag.hojeData))}</span>
+        <span><span class="nome">${esc(ev.evento || ev.local)}${ev.evento && ev.local && ev.evento !== ev.local ? ' · ' + esc(ev.local) : ''}</span><br><span class="end">${esc([horario(ev), ev.endereco].filter(Boolean).join(' · '))}</span></span>
+        <a href="${esc(urlAbrirMapa(ev))}" target="_blank" rel="noopener">Ver no mapa ›</a>
+      </li>`).join('') + `</ul></section>`;
+  }
+  caixa.innerHTML = html;
+}
+
+// Agenda de exemplo para testar sem a planilha (?demo=semana|hoje|nada).
+// "semana" usa a agenda fixa real (quinta em Caieiras, sábado na 7 de
+// setembro), repetida toda semana como a planilha vai fazer; "hoje" finge que
+// hoje é dia de 7 de setembro.
+const AGENDA_FIXA_DEMO = [
+  { dia_semana: 4, evento: '', local: 'Nova Caieiras', endereco: 'Ver. Bento Rodrigues, Nova Caieiras, Caieiras - SP, 07700-000' },
+  { dia_semana: 6, evento: '', local: '7 de setembro', endereco: 'Av. Sete de Setembro, 45, Franco da Rocha - SP' }
+];
+function agendaDemo(tipo){
+  const hoje = agoraSP().data;
+  if (tipo === 'nada') return { ok: true, eventos: [] };
+  const eventos = [];
+  for (let n = 0; n < 21; n++) {
+    const data = somarDias(hoje, n);
+    const dia = new Date(data + 'T12:00:00Z').getUTCDay();
+    AGENDA_FIXA_DEMO.filter(f => f.dia_semana === dia).forEach(f => eventos.push({ data, inicio: '', fim: '', evento: f.evento, local: f.local, endereco: f.endereco, lat: null, lng: null, aviso: '' }));
+  }
+  if (tipo === 'hoje' && !eventos.some(ev => ev.data === hoje)) {
+    const f = AGENDA_FIXA_DEMO[1];
+    eventos.unshift({ data: hoje, inicio: '', fim: '', evento: '', local: f.local, endereco: f.endereco, lat: null, lng: null, aviso: '' });
+  }
+  return { ok: true, eventos };
+}
+
+async function buscarAgenda(){
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const resp = await fetch(URL_CARDAPIO + (URL_CARDAPIO.includes('?') ? '&' : '?') + 'action=agenda', { cache: 'no-store', signal: ctrl.signal });
+    const dados = await resp.json();
+    if (!dados || dados.ok !== true || !Array.isArray(dados.eventos)) throw new Error('resposta inesperada');
+    return dados;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function iniciarAgenda(){
+  const demo = new URLSearchParams(location.search).get('demo');
+  if (demo) {
+    const aviso = document.getElementById('avisoDemo');
+    aviso.hidden = false;
+    aviso.textContent = '🧪 Página de teste (' + demo + '): agenda fixa de quinta e sábado, ainda sem horário' + (demo === 'hoje' ? '; finge que hoje é dia de 7 de setembro' : '') + '.';
+    renderAgenda(agendaDemo(demo));
+    return;
+  }
+  if (!URL_CARDAPIO) { renderAgenda(null); return; }
+  try {
+    renderAgenda(await buscarAgenda());
+  } catch (err) {
+    console.warn('agenda: falha ao buscar da planilha', err);
+    renderAgenda(null);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // início: mostra o último cardápio guardado no aparelho na hora e atualiza
 // pela planilha em seguida.
 // ---------------------------------------------------------------------------
 async function iniciar(){
   renderLinks();
+  mostrarTela();
+  iniciarAgenda();
   if (!URL_CARDAPIO) {
     render(DADOS_EXEMPLO);
     return;
