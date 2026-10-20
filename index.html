@@ -171,6 +171,15 @@
   .sem-evento{text-align:center;padding:34px 18px 28px;}
   .sem-evento .emoji{font-size:44px;display:block;margin-bottom:6px;}
   .sem-evento p{margin:4px 0;font-size:14px;color:var(--ink-soft);}
+  /* v11: cardápio especial por evento */
+  .troca-cardapio{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px;}
+  .troca-cardapio .chip{box-shadow:2px 2px 0 var(--orange2);}
+  .faixa-especial{margin:10px 0 0;background:#2a1f0d;border:2px solid var(--orange);color:var(--paper);border-radius:12px;padding:10px 14px;font-size:13.5px;line-height:1.45;}
+  .faixa-especial b{color:var(--orange);}
+  .local.especial{box-shadow:5px 5px 0 var(--orange);}
+  .local .selo-especial{display:inline-block;background:var(--orange);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:2px 10px;font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+  .especiais{margin-top:26px;}
+  .especiais h3{font-family:'Titan One',cursive;font-weight:400;font-size:20px;margin:0 0 4px;color:var(--orange);}
   .aviso-demo{margin:0 0 14px;background:#2a1f0d;border:2px dashed var(--orange);color:var(--orange);border-radius:10px;padding:8px 12px;font-size:12.5px;font-weight:600;text-align:center;}
 
   @media (max-width:600px){
@@ -283,6 +292,7 @@
     <div class="wrap"><div class="lista" id="catLista"></div></div>
   </nav>
 
+  <div class="wrap" id="trocaCardapio" hidden></div>
   <main class="wrap" id="conteudo">
     <div class="grade" aria-hidden="true">
       <div class="esqueleto"></div><div class="esqueleto"></div><div class="esqueleto"></div>
@@ -542,8 +552,53 @@ function htmlPrecos(prato){
   return html;
 }
 
+// v11: cardápio especial por evento. dados.especiais = [{nome, eventos:[{data,
+// local, evento}], itens}]: a planilha só manda os cardápios dos eventos de
+// HOJE (o preço do site é sempre o do cardápio do dia). Nesse dia a tela
+// Cardápio abre no cardápio do evento, com um botão para o de sempre; o link
+// #cardapio/<nome> abre um cardápio específico.
+let DADOS_CARDAPIO = null;
+function especiaisDe(dados){
+  return (dados && Array.isArray(dados.especiais) ? dados.especiais : []).filter(c => c && c.nome && Array.isArray(c.itens) && c.itens.length);
+}
+function cardapioPedido(){
+  const m = location.hash.match(/^#cardapio\/(.+)$/);
+  return m ? decodeURIComponent(m[1]) : '';
+}
+function especialDeHoje(dados){
+  const hoje = agoraSP().data;
+  return especiaisDe(dados).find(c => (c.eventos || []).some(ev => ev.data === hoje)) || null;
+}
+function escolherCardapio(dados){
+  const pedido = cardapioPedido();
+  if (pedido === 'normal') return null;
+  if (pedido) {
+    const achado = especiaisDe(dados).find(c => slug(c.nome) === slug(pedido));
+    if (achado) return achado;
+  }
+  return especialDeHoje(dados);
+}
+function quandoEspecial(c){
+  const hoje = agoraSP().data;
+  return (c.eventos || []).map(ev => diaPorExtenso(ev.data, hoje) + (ev.local ? ' · ' + ev.local : '')).join(', ');
+}
+function renderTroca(dados, escolhido){
+  const caixa = document.getElementById('trocaCardapio');
+  const lista = especiaisDe(dados);
+  if (!lista.length) { caixa.hidden = true; caixa.innerHTML = ''; return; }
+  const chips = [`<button class="chip${escolhido ? '' : ' ativo'}" type="button" data-cardapio="normal">🍜 Cardápio de sempre</button>`]
+    .concat(lista.map(c => `<button class="chip${escolhido === c ? ' ativo' : ''}" type="button" data-cardapio="${esc(slug(c.nome))}">⭐ ${esc(c.nome)}</button>`));
+  caixa.hidden = false;
+  caixa.innerHTML = `<div class="troca-cardapio">${chips.join('')}</div>` +
+    (escolhido ? `<div class="faixa-especial">⭐ <b>Cardápio especial: ${esc(escolhido.nome)}</b><br>Vale ${esc(quandoEspecial(escolhido))}. Nos outros dias vale o cardápio de sempre.</div>` : '');
+  caixa.querySelectorAll('[data-cardapio]').forEach(b => b.addEventListener('click', () => irPara('cardapio/' + b.dataset.cardapio)));
+}
+
 function render(dados){
-  const categorias = montarCategorias(dados.itens);
+  DADOS_CARDAPIO = dados;
+  const escolhido = escolherCardapio(dados);
+  renderTroca(dados, escolhido);
+  const categorias = montarCategorias(escolhido ? escolhido.itens : dados.itens);
   const main = document.getElementById('conteudo');
   document.getElementById('avisoExemplo').hidden = !dados.exemplo;
 
@@ -724,6 +779,10 @@ const TITULOS = { '': 'Narua · Comida asiática de rua', 'cardapio': 'Narua · 
 
 function mostrarTela(){
   let nome = location.hash.replace(/^#/, '');
+  if (/^cardapio(\/|$)/.test(nome)) {
+    nome = 'cardapio';
+    if (DADOS_CARDAPIO && zoomAtual < 0) render(DADOS_CARDAPIO);
+  }
   if (!(nome in TELAS)) nome = '';
   Object.entries(TELAS).forEach(([k, id]) => { document.getElementById(id).hidden = k !== nome; });
   document.title = TITULOS[nome];
@@ -801,18 +860,26 @@ function organizarAgenda(dados){
     .filter(ev => ev && /^\d{4}-\d{2}-\d{2}$/.test(String(ev.data || '')) && (ev.local || ev.evento))
     .filter(ev => ev.data > agora.data || (ev.data === agora.data && !(ev.fim && hora(ev.fim) && String(ev.fim).slice(0, 5) <= agora.hora)))
     .sort((a, b) => (a.data + (a.inicio || '')).localeCompare(b.data + (b.inicio || '')));
-  const hoje = eventos.find(ev => ev.data === agora.data) || null;
+  // Dois eventos no mesmo dia: o especial vem primeiro.
+  const hoje = eventos.find(ev => ev.data === agora.data && ev.especial) || eventos.find(ev => ev.data === agora.data) || null;
   const resto = eventos.filter(ev => ev !== hoje);
-  return { hojeData: agora.data, hoje, proximo: hoje ? null : (resto[0] || null), seguintes: resto.slice(hoje ? 0 : 1, (hoje ? 0 : 1) + MAX_PROXIMOS) };
+  const proximo = hoje ? null : (resto[0] || null);
+  // Eventos especiais aparecem TODOS, numa seção própria (fora do limite dos
+  // próximos eventos); a lista "Próximos eventos" fica só com os comuns.
+  const especiais = resto.filter(ev => ev.especial && ev !== proximo);
+  const comuns = resto.filter(ev => !ev.especial && ev !== proximo);
+  return { hojeData: agora.data, hoje, proximo, especiais, seguintes: comuns.slice(0, MAX_PROXIMOS) };
 }
 
 function htmlLocal(ev, rotulo, hoje){
   const nome = ev.evento && ev.local && normalizar(ev.evento) !== normalizar(ev.local) ? `${ev.evento}` : (ev.evento || ev.local);
   const sub = ev.evento && ev.local && normalizar(ev.evento) !== normalizar(ev.local) ? ev.local : '';
   const quando = (ev.data === hoje ? 'Hoje' : diaPorExtenso(ev.data, hoje).replace(/^./, c => c.toUpperCase())) + (horario(ev) ? ', ' + horario(ev) : '');
+  const cardapio = ev.cardapio && ev.data === hoje ? `<a href="#cardapio/${esc(encodeURIComponent(slug(ev.cardapio)))}">⭐ Ver cardápio do evento</a>` : '';
   return `
-    <article class="local">
+    <article class="local${ev.especial ? ' especial' : ''}">
       <div class="topo">
+        ${ev.especial ? '<span class="selo-especial">⭐ Evento especial</span>' : ''}
         <div class="rotulo">${esc(rotulo)}</div>
         <h2>${esc(nome)}</h2>
         ${sub ? `<p class="linha"><b>${esc(sub)}</b></p>` : ''}
@@ -822,6 +889,7 @@ function htmlLocal(ev, rotulo, hoje){
       </div>
       <iframe class="mapa" src="${esc(urlMapa(ev))}" title="Mapa: ${esc(nome)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
       <div class="acoes">
+        ${cardapio}
         <a href="${esc(urlComoChegar(ev))}" target="_blank" rel="noopener">🧭 Como chegar</a>
         <a class="sec" href="${esc(urlAbrirMapa(ev))}" target="_blank" rel="noopener">Abrir no Google Maps</a>
       </div>
@@ -849,7 +917,8 @@ function renderAgenda(dados){
     sub.textContent = 'Hoje: ' + (ag.hoje.local || ag.hoje.evento);
   } else {
     faixa.hidden = true;
-    sub.textContent = ag.proximo ? 'Próximo: ' + diaPorExtenso(ag.proximo.data, ag.hojeData) + ', ' + (ag.proximo.local || ag.proximo.evento) : 'Agenda e localização';
+    if (!ag.proximo && ag.especiais.length) sub.textContent = '⭐ Evento especial: ' + diaPorExtenso(ag.especiais[0].data, ag.hojeData);
+    else sub.textContent = ag.proximo ? 'Próximo: ' + diaPorExtenso(ag.proximo.data, ag.hojeData) + ', ' + (ag.proximo.local || ag.proximo.evento) : 'Agenda e localização';
   }
 
   let html = '';
@@ -857,6 +926,11 @@ function renderAgenda(dados){
   else if (ag.proximo) html += `<p class="linha" style="margin:10px 0 0;color:#cfc7b4;font-size:14px;">Hoje o food truck não está na rua. Nosso próximo evento:</p>` + htmlLocal(ag.proximo, 'Próximo evento', ag.hojeData);
   else html += `<article class="local"><div class="sem-evento"><span class="emoji">🚚</span><p><b>Hoje o food truck não está na rua.</b></p><p>Os próximos eventos saem aqui e no nosso Instagram.</p>${insta}</div></article>`;
 
+  if (ag.especiais.length) {
+    html += `<section class="especiais"><h3>⭐ Eventos especiais</h3>` +
+      ag.especiais.map(ev => htmlLocal(ev, diaPorExtenso(ev.data, ag.hojeData).replace(/^./, c => c.toUpperCase()), ag.hojeData)).join('') +
+      `</section>`;
+  }
   if (ag.seguintes.length) {
     html += `<section class="proximos"><h3>Próximos eventos</h3><ul>` + ag.seguintes.map(ev => `
       <li>
