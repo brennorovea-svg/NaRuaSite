@@ -909,6 +909,12 @@ async function iniciar(){
   if (cache) { render(cache); renderAtualizado(cache); }
   try {
     const dados = await buscarCardapio();
+    // Planilha veio sem nenhum prato (aba Menu apagada ou com erro): continua
+    // mostrando o último cardápio bom guardado no aparelho e não o substitui.
+    if (!montarCategorias(dados.itens).length && cache && montarCategorias(cache.itens).length) {
+      console.warn('cardápio: planilha veio vazia, mantendo o último cardápio guardado');
+      return;
+    }
     gravarCache(dados);
     // não redesenha com a foto aberta, para não fechar o que a pessoa está vendo
     if (zoomAtual < 0) { render(dados); renderAtualizado(dados); }
