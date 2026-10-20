@@ -75,6 +75,8 @@
   .prato .foto:focus-visible{outline:3px solid var(--cyan);outline-offset:-3px;}
   .prato .corpo{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1;}
   .prato h3{font-family:'Titan One',cursive;font-weight:400;font-size:21px;line-height:1.15;margin:0;}
+  .selos{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+  .tag-contem{font-family:'Poppins',sans-serif;font-weight:600;font-size:11px;color:var(--ink-soft, #5c564a);background:rgba(0,0,0,.04);border:1px solid var(--line, #e3dac1);border-radius:999px;padding:2px 9px;}
   .tag-veg{align-self:flex-start;font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#1f6b36;background:#dff3e4;border:2px solid var(--green);border-radius:999px;padding:2px 9px;}
   .prato .desc{font-size:13.5px;line-height:1.45;color:var(--ink-soft);margin:0;}
   .precos{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:8px;align-items:center;}
@@ -414,6 +416,22 @@ function gravarCache(dados){
 }
 
 // Converte o que estiver no campo Foto num endereço de imagem seguro.
+// Selos do prato. Com o Apps Script v10 vêm as caixinhas da aba Menu
+// (Contém ovo / leite / carne; carne inclui frango, porco, peixe e frutos do
+// mar): sem carne = vegetariano, sem carne, ovo e leite = vegano. Bebidas não
+// ganham selo. Sem as caixinhas (Apps Script antigo), vale o 🌱 Vegetariano antigo.
+function seloVerde(p){
+  if (!p.temCaixinhas) return p.vegetariano ? 'Vegetariano' : '';
+  if (normalizar(p.categoria) === 'bebidas' || p.carne) return '';
+  return p.ovo || p.leite ? 'Vegetariano' : 'Vegano';
+}
+function htmlSelos(p){
+  const verde = seloVerde(p);
+  const contem = p.temCaixinhas && normalizar(p.categoria) !== 'bebidas'
+    ? [p.ovo && '🥚 Ovo', p.leite && '🥛 Leite', p.carne && '🍖 Carne'].filter(Boolean) : [];
+  if (!verde && !contem.length) return '';
+  return `<div class="selos">${verde ? `<span class="tag-veg">🌱 ${verde}</span>` : ''}${contem.length ? `<span class="tag-contem">Contém ${contem.join(' · ')}</span>` : ''}</div>`;
+}
 function urlFoto(valor){
   const v = String(valor || '').trim();
   if (!v) return '';
@@ -457,7 +475,8 @@ function montarCategorias(itens){
     const chave = normalizar(categoria) + '|' + normalizar(nome);
     let prato = porNome.get(chave);
     if (!prato) {
-      prato = { nome, categoria, descricao: '', foto: '', vegetariano: false, variantes: [], esgotados: 0 };
+      prato = { nome, categoria, descricao: '', foto: '', vegetariano: false, variantes: [], esgotados: 0,
+        temCaixinhas: false, ovo: false, leite: false, carne: false };
       porNome.set(chave, prato);
       if (!porCategoria.has(categoria)) porCategoria.set(categoria, []);
       porCategoria.get(categoria).push(prato);
@@ -465,6 +484,13 @@ function montarCategorias(itens){
     if (!prato.descricao && it.descricao) prato.descricao = String(it.descricao);
     if (!prato.foto && it.foto) prato.foto = urlFoto(it.foto);
     if (it.vegetariano === true) prato.vegetariano = true;
+    // Apps Script v10: caixinhas Contém ovo / leite / carne no lugar do Vegetariano.
+    if ('contem_carne' in it || 'contem_ovo' in it || 'contem_leite' in it) {
+      prato.temCaixinhas = true;
+      if (it.contem_ovo === true) prato.ovo = true;
+      if (it.contem_leite === true) prato.leite = true;
+      if (it.contem_carne === true) prato.carne = true;
+    }
     const esgotado = status === 'esgotado';
     if (esgotado) prato.esgotados++;
     prato.variantes.push({ tamanho: String(it.tamanho || '').trim(), preco: Number(it.preco) || 0, preco_ifood: Number(it.preco_ifood) || 0, esgotado });
@@ -543,7 +569,7 @@ function render(dados){
           </button>
           <div class="corpo">
             <h3>${esc(p.nome)}</h3>
-            ${p.vegetariano ? '<span class="tag-veg">🌱 Vegetariano</span>' : ''}
+            ${htmlSelos(p)}
             ${p.descricao ? `<p class="desc">${esc(p.descricao)}</p>` : ''}
             <div class="precos">${htmlPrecos(p)}</div>
           </div>
@@ -638,7 +664,7 @@ function abrirZoom(i){
   img.onerror = () => { img.onerror = null; img.src = fotoProvisoria(p.nome, i); };
   img.src = p.src;
   img.alt = p.nome;
-  document.getElementById('zoomNome').textContent = p.nome + (p.vegetariano ? ' 🌱' : '') + (p.esgotado ? ' · esgotado' : '');
+  document.getElementById('zoomNome').textContent = p.nome + (seloVerde(p) ? ' 🌱' : '') + (p.esgotado ? ' · esgotado' : '');
   const desc = document.getElementById('zoomDesc');
   desc.textContent = p.descricao || '';
   desc.hidden = !p.descricao;
