@@ -84,6 +84,8 @@
   .preco .tam{font-family:'Poppins',sans-serif;font-weight:700;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;margin-right:6px;}
   .preco-ifood{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);width:100%;}
 
+  .tag-exclusivo{align-self:flex-start;font-family:'Poppins',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);background:var(--orange);border:2px solid var(--ink);border-radius:999px;padding:2px 9px;}
+  .prato.exclusivo{box-shadow:5px 5px 0 var(--orange);border-color:var(--orange);}
   .selo{position:absolute;top:10px;left:10px;font-family:'Poppins',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;border:2px solid var(--ink);border-radius:999px;padding:4px 10px;}
   .selo-esgotado{background:var(--red);color:#fff;}
   .selo-breve{background:var(--paper);color:var(--ink-soft);top:auto;bottom:10px;left:auto;right:10px;font-size:10.5px;}
@@ -360,9 +362,12 @@ const PASTA_FOTOS = 'fotos/';
 
 // Ordem das categorias na tela. Categorias que não estiverem aqui aparecem
 // depois, na ordem em que surgem na planilha.
-const ORDEM_CATEGORIAS = ['Pratos', 'Petiscos', 'Bebidas'];
+// Itens marcados "Só no evento" na aba Cardápios especiais (Apps Script v14)
+// vão para uma seção própria, no topo do cardápio do evento.
+const CAT_EXCLUSIVOS = 'Só no evento';
+const ORDEM_CATEGORIAS = [CAT_EXCLUSIVOS, 'Pratos', 'Petiscos', 'Bebidas'];
 
-const EMOJI_CATEGORIA = { 'pratos': '🍜', 'petiscos': '🥟', 'bebidas': '🥤', 'sobremesas': '🍡' };
+const EMOJI_CATEGORIA = { 'so no evento': '⭐', 'pratos': '🍜', 'petiscos': '🥟', 'bebidas': '🥤', 'sobremesas': '🍡' };
 
 // Emoji usado na foto provisória, procurado pelo nome do prato.
 const EMOJI_PRATO = [
@@ -435,12 +440,13 @@ function seloVerde(p){
   if (normalizar(p.categoria) === 'bebidas' || p.carne) return '';
   return p.ovo || p.leite ? 'Vegetariano' : 'Vegano';
 }
+let TEXTO_EXCLUSIVO = '⭐ Só no dia do evento';
 function htmlSelos(p){
   const verde = seloVerde(p);
   const contem = p.temCaixinhas && normalizar(p.categoria) !== 'bebidas'
     ? [p.ovo && '🥚 Ovo', p.leite && '🥛 Leite', p.carne && '🍖 Carne'].filter(Boolean) : [];
-  if (!verde && !contem.length) return '';
-  return `<div class="selos">${verde ? `<span class="tag-veg">🌱 ${verde}</span>` : ''}${contem.length ? `<span class="tag-contem">Contém ${contem.join(' · ')}</span>` : ''}</div>`;
+  if (!verde && !contem.length && !p.exclusivo) return '';
+  return `<div class="selos">${p.exclusivo ? `<span class="tag-exclusivo">${esc(TEXTO_EXCLUSIVO)}</span>` : ''}${verde ? `<span class="tag-veg">🌱 ${verde}</span>` : ''}${contem.length ? `<span class="tag-contem">Contém ${contem.join(' · ')}</span>` : ''}</div>`;
 }
 function urlFoto(valor){
   const v = String(valor || '').trim();
@@ -485,14 +491,15 @@ function montarCategorias(itens){
     const status = normalizar(it.status || 'disponivel');
     if (status === 'oculto') return;
     const categoria = String(it.categoria || '').trim() || 'Outros';
-    const chave = normalizar(categoria) + '|' + normalizar(nome);
+    const grupo = it.exclusivo === true ? CAT_EXCLUSIVOS : categoria;
+    const chave = normalizar(grupo) + '|' + normalizar(nome);
     let prato = porNome.get(chave);
     if (!prato) {
-      prato = { nome, categoria, descricao: '', foto: '', vegetariano: false, variantes: [], esgotados: 0,
+      prato = { nome, categoria, exclusivo: it.exclusivo === true, descricao: '', foto: '', vegetariano: false, variantes: [], esgotados: 0,
         temCaixinhas: false, ovo: false, leite: false, carne: false };
       porNome.set(chave, prato);
-      if (!porCategoria.has(categoria)) porCategoria.set(categoria, []);
-      porCategoria.get(categoria).push(prato);
+      if (!porCategoria.has(grupo)) porCategoria.set(grupo, []);
+      porCategoria.get(grupo).push(prato);
     }
     if (!prato.descricao && it.descricao) prato.descricao = String(it.descricao);
     if (!prato.foto && it.foto) prato.foto = urlFoto(it.foto);
@@ -572,12 +579,18 @@ function especialDeHoje(dados){
 }
 function escolherCardapio(dados){
   const pedido = cardapioPedido();
-  if (pedido === 'normal') return null;
+  // No dia do evento o site só mostra o cardápio do evento (pedido do Brenno,
+  // 20/10): o "Cardápio de sempre" some e o link #cardapio/normal cai nele.
+  if (pedido === 'normal') return especialDeHoje(dados);
   if (pedido) {
     const achado = especiaisDe(dados).find(c => slug(c.nome) === slug(pedido));
     if (achado) return achado;
   }
   return especialDeHoje(dados);
+}
+function dataCurta(d){
+  const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? m[3] + '/' + m[2] : '';
 }
 function tituloEspecial(c){
   const nomes = [];
@@ -592,11 +605,16 @@ function renderTroca(dados, escolhido){
   const caixa = document.getElementById('trocaCardapio');
   const lista = especiaisDe(dados);
   if (!lista.length) { caixa.hidden = true; caixa.innerHTML = ''; return; }
-  const chips = [`<button class="chip${escolhido ? '' : ' ativo'}" type="button" data-cardapio="normal">🍜 Cardápio de sempre</button>`]
+  const deHoje = especialDeHoje(dados);
+  const chips = (deHoje ? [] : [`<button class="chip${escolhido ? '' : ' ativo'}" type="button" data-cardapio="normal">🍜 Cardápio de sempre</button>`])
     .concat(lista.map(c => `<button class="chip${escolhido === c ? ' ativo' : ''}" type="button" data-cardapio="${esc(slug(c.nome))}">⭐ ${esc(tituloEspecial(c))}</button>`));
   caixa.hidden = false;
-  caixa.innerHTML = `<div class="troca-cardapio">${chips.join('')}</div>` +
-    (escolhido ? `<div class="faixa-especial">⭐ <b>${esc(tituloEspecial(escolhido))}</b><br>Vale ${esc(quandoEspecial(escolhido))}. Nos outros dias vale o cardápio de sempre.</div>` : '');
+  const hojeEsc = escolhido && escolhido === deHoje;
+  const temExclusivo = escolhido && escolhido.itens.some(it => it.exclusivo === true);
+  caixa.innerHTML = (chips.length > 1 ? `<div class="troca-cardapio">${chips.join('')}</div>` : '') +
+    (escolhido ? `<div class="faixa-especial">⭐ <b>${esc(tituloEspecial(escolhido))}</b><br>` +
+      (hojeEsc ? `Hoje vale este cardápio${temExclusivo ? ', com itens que só existem no evento' : ''}.`
+        : `Vale ${esc(quandoEspecial(escolhido))}.${temExclusivo ? ' Os itens marcados ⭐ só existem no dia do evento.' : ''} Até lá, vale o cardápio de sempre.`) + `</div>` : '');
   caixa.querySelectorAll('[data-cardapio]').forEach(b => b.addEventListener('click', () => irPara('cardapio/' + b.dataset.cardapio)));
 }
 
@@ -606,6 +624,8 @@ function render(dados){
   renderTroca(dados, escolhido);
   // o botão "Conferir menu" do Onde estamos depende do cardápio já carregado
   if (ULTIMA_AGENDA) renderAgenda(ULTIMA_AGENDA);
+  TEXTO_EXCLUSIVO = escolhido && escolhido === especialDeHoje(dados) ? '⭐ Só hoje, no evento'
+    : '⭐ Só no dia do evento' + (escolhido && escolhido.eventos && escolhido.eventos[0] ? ' (' + dataCurta(escolhido.eventos[0].data) + ')' : '');
   const categorias = montarCategorias(escolhido ? escolhido.itens : dados.itens);
   const main = document.getElementById('conteudo');
   document.getElementById('avisoExemplo').hidden = !dados.exemplo;
@@ -627,7 +647,7 @@ function render(dados){
       p.provisoria = provisoria;
       p.zoomIdx = PRATOS_COM_ZOOM.push(p) - 1;
       return `
-        <article class="prato${p.esgotado ? ' esgotado' : ''}">
+        <article class="prato${p.esgotado ? ' esgotado' : ''}${p.exclusivo ? ' exclusivo' : ''}">
           <button class="foto" type="button" data-zoom="${p.zoomIdx}" aria-label="Ver foto de ${esc(p.nome)}">
             <img src="${esc(p.src)}" alt="${esc(p.nome)}" loading="lazy" decoding="async" data-prov="${esc(fotoProvisoria(p.nome, i))}">
             ${p.esgotado ? '<span class="selo selo-esgotado">Esgotado</span>' : ''}
