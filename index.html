@@ -325,7 +325,8 @@ const URL_CARDAPIO = 'https://script.google.com/macros/s/AKfycbyCEC_kkgmHXvZ74xP
 // Links do rodapé. Deixe vazio ('') para esconder o botão.
 const LINKS = {
   instagram: 'https://instagram.com/narua.foodtruck',
-  whatsapp: '',    // ex.: 'https://wa.me/5511999999999'
+  // Contato comercial: (11) 94328-3434, já com a mensagem pronta.
+  whatsapp: 'https://wa.me/5511943283434?text=Ol%C3%A1%21%20Vi%20o%20site%20da%20Narua%20e%20quero%20conhecer%20seus%20produtos',
   ifood: ''        // ex.: 'https://www.ifood.com.br/delivery/...'
 };
 
@@ -593,7 +594,7 @@ function renderNav(categorias){
 function renderLinks(){
   const cartoes = [];
   if (LINKS.instagram) cartoes.push(`<a class="home-card c-red" href="${esc(LINKS.instagram)}" target="_blank" rel="noopener"><span class="icon">📸</span><span class="title">Instagram<span class="sub">@narua.foodtruck</span></span></a>`);
-  if (LINKS.whatsapp) cartoes.push(`<a class="home-card c-green" href="${esc(LINKS.whatsapp)}" target="_blank" rel="noopener"><span class="icon">💬</span><span class="title">WhatsApp</span></a>`);
+  if (LINKS.whatsapp) cartoes.push(`<a class="home-card c-green" href="${esc(LINKS.whatsapp)}" target="_blank" rel="noopener"><span class="icon">💬</span><span class="title">WhatsApp<span class="sub">Fale com a gente · (11) 94328-3434</span></span></a>`);
   if (LINKS.ifood) cartoes.push(`<a class="home-card c-orange" href="${esc(LINKS.ifood)}" target="_blank" rel="noopener"><span class="icon">🛵</span><span class="title">Peça no iFood</span></a>`);
   const grade = document.getElementById('homeGrid');
   grade.querySelectorAll('a.home-card').forEach(a => a.remove());
