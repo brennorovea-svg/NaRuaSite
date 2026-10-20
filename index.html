@@ -553,10 +553,11 @@ function htmlPrecos(prato){
 }
 
 // v11: cardápio especial por evento. dados.especiais = [{nome, eventos:[{data,
-// local, evento}], itens}]: a planilha só manda os cardápios dos eventos de
-// HOJE (o preço do site é sempre o do cardápio do dia). Nesse dia a tela
-// Cardápio abre no cardápio do evento, com um botão para o de sempre; o link
-// #cardapio/<nome> abre um cardápio específico.
+// local, evento}], itens}]: a planilha manda os cardápios dos eventos da
+// agenda de hoje em diante (Apps Script v13; até a v12, só os de hoje). O
+// cliente pode ver o "Menu do evento X" antes do dia pelo botão "Conferir
+// menu"; no dia, a tela Cardápio já abre nele, com um botão para o de sempre.
+// O link #cardapio/<nome> abre um cardápio específico.
 let DADOS_CARDAPIO = null;
 function especiaisDe(dados){
   return (dados && Array.isArray(dados.especiais) ? dados.especiais : []).filter(c => c && c.nome && Array.isArray(c.itens) && c.itens.length);
@@ -578,6 +579,11 @@ function escolherCardapio(dados){
   }
   return especialDeHoje(dados);
 }
+function tituloEspecial(c){
+  const nomes = [];
+  (c.eventos || []).forEach(ev => { const n = maiuscula(ev.evento || ev.local || ''); if (n && !nomes.some(x => normalizar(x) === normalizar(n))) nomes.push(n); });
+  return 'Menu do evento ' + (nomes.join(' / ') || c.nome);
+}
 function quandoEspecial(c){
   const hoje = agoraSP().data;
   return (c.eventos || []).map(ev => diaPorExtenso(ev.data, hoje) + (ev.local ? ' · ' + ev.local : '')).join(', ');
@@ -587,10 +593,10 @@ function renderTroca(dados, escolhido){
   const lista = especiaisDe(dados);
   if (!lista.length) { caixa.hidden = true; caixa.innerHTML = ''; return; }
   const chips = [`<button class="chip${escolhido ? '' : ' ativo'}" type="button" data-cardapio="normal">🍜 Cardápio de sempre</button>`]
-    .concat(lista.map(c => `<button class="chip${escolhido === c ? ' ativo' : ''}" type="button" data-cardapio="${esc(slug(c.nome))}">⭐ ${esc(c.nome)}</button>`));
+    .concat(lista.map(c => `<button class="chip${escolhido === c ? ' ativo' : ''}" type="button" data-cardapio="${esc(slug(c.nome))}">⭐ ${esc(tituloEspecial(c))}</button>`));
   caixa.hidden = false;
   caixa.innerHTML = `<div class="troca-cardapio">${chips.join('')}</div>` +
-    (escolhido ? `<div class="faixa-especial">⭐ <b>Cardápio especial: ${esc(escolhido.nome)}</b><br>Vale ${esc(quandoEspecial(escolhido))}. Nos outros dias vale o cardápio de sempre.</div>` : '');
+    (escolhido ? `<div class="faixa-especial">⭐ <b>${esc(tituloEspecial(escolhido))}</b><br>Vale ${esc(quandoEspecial(escolhido))}. Nos outros dias vale o cardápio de sempre.</div>` : '');
   caixa.querySelectorAll('[data-cardapio]').forEach(b => b.addEventListener('click', () => irPara('cardapio/' + b.dataset.cardapio)));
 }
 
@@ -873,19 +879,19 @@ function organizarAgenda(dados){
   return { hojeData: agora.data, hoje, proximo, especiais, seguintes: comuns.slice(0, MAX_PROXIMOS) };
 }
 
-// Botão "Conferir menu": só no dia do evento e só se o cardápio dele já está
-// cadastrado na aba "Cardápios especiais" (a planilha manda esse cardápio
-// junto com o de sempre, e só no dia).
-function temMenuDoEvento(ev, hoje){
-  if (!ev.cardapio || ev.data !== hoje) return false;
-  return especiaisDe(DADOS_CARDAPIO).some(c => slug(c.nome) === slug(ev.cardapio) && (c.eventos || []).some(e => e.data === hoje));
+// Botão "Conferir menu": aparece em qualquer dia, mas só se o cardápio do
+// evento já está cadastrado na aba "Cardápios especiais" (a planilha só manda
+// os cardápios que existem e estão ligados a um evento da agenda).
+function temMenuDoEvento(ev){
+  if (!ev.cardapio) return false;
+  return especiaisDe(DADOS_CARDAPIO).some(c => slug(c.nome) === slug(ev.cardapio) && (c.eventos || []).some(e => e.data === ev.data));
 }
 
 function htmlLocal(ev, rotulo, hoje){
   const nome = ev.evento && ev.local && normalizar(ev.evento) !== normalizar(ev.local) ? `${ev.evento}` : (ev.evento || ev.local);
   const sub = ev.evento && ev.local && normalizar(ev.evento) !== normalizar(ev.local) ? ev.local : '';
   const quando = (ev.data === hoje ? 'Hoje' : diaPorExtenso(ev.data, hoje).replace(/^./, c => c.toUpperCase())) + (horario(ev) ? ', ' + horario(ev) : '');
-  const cardapio = temMenuDoEvento(ev, hoje) ? `<a href="#cardapio/${esc(encodeURIComponent(slug(ev.cardapio)))}">📋 Conferir menu</a>` : '';
+  const cardapio = temMenuDoEvento(ev) ? `<a href="#cardapio/${esc(encodeURIComponent(slug(ev.cardapio)))}">📋 Conferir menu</a>` : '';
   return `
     <article class="local${ev.especial ? ' especial' : ''}">
       <div class="topo">
