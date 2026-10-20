@@ -466,6 +466,9 @@ function fotoProvisoria(nome, indice){
 function montarCategorias(itens){
   const porCategoria = new Map();
   const porNome = new Map();
+  // Enquanto nenhuma caixinha estiver marcada na aba Menu (valores ainda em
+  // validação), vale o 🌱 Vegetariano antigo, pra não mostrar "Vegano" em tudo.
+  const caixinhasPreenchidas = (itens || []).some(it => it.contem_ovo === true || it.contem_leite === true || it.contem_carne === true);
   (itens || []).forEach(it => {
     const nome = String(it.nome || '').trim();
     if (!nome) return;
@@ -485,7 +488,7 @@ function montarCategorias(itens){
     if (!prato.foto && it.foto) prato.foto = urlFoto(it.foto);
     if (it.vegetariano === true) prato.vegetariano = true;
     // Apps Script v10: caixinhas Contém ovo / leite / carne no lugar do Vegetariano.
-    if ('contem_carne' in it || 'contem_ovo' in it || 'contem_leite' in it) {
+    if (caixinhasPreenchidas && ('contem_carne' in it || 'contem_ovo' in it || 'contem_leite' in it)) {
       prato.temCaixinhas = true;
       if (it.contem_ovo === true) prato.ovo = true;
       if (it.contem_leite === true) prato.leite = true;
