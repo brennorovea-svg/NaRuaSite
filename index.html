@@ -598,6 +598,8 @@ function render(dados){
   DADOS_CARDAPIO = dados;
   const escolhido = escolherCardapio(dados);
   renderTroca(dados, escolhido);
+  // o botão "Conferir menu" do Onde estamos depende do cardápio já carregado
+  if (ULTIMA_AGENDA) renderAgenda(ULTIMA_AGENDA);
   const categorias = montarCategorias(escolhido ? escolhido.itens : dados.itens);
   const main = document.getElementById('conteudo');
   document.getElementById('avisoExemplo').hidden = !dados.exemplo;
@@ -871,11 +873,19 @@ function organizarAgenda(dados){
   return { hojeData: agora.data, hoje, proximo, especiais, seguintes: comuns.slice(0, MAX_PROXIMOS) };
 }
 
+// Botão "Conferir menu": só no dia do evento e só se o cardápio dele já está
+// cadastrado na aba "Cardápios especiais" (a planilha manda esse cardápio
+// junto com o de sempre, e só no dia).
+function temMenuDoEvento(ev, hoje){
+  if (!ev.cardapio || ev.data !== hoje) return false;
+  return especiaisDe(DADOS_CARDAPIO).some(c => slug(c.nome) === slug(ev.cardapio) && (c.eventos || []).some(e => e.data === hoje));
+}
+
 function htmlLocal(ev, rotulo, hoje){
   const nome = ev.evento && ev.local && normalizar(ev.evento) !== normalizar(ev.local) ? `${ev.evento}` : (ev.evento || ev.local);
   const sub = ev.evento && ev.local && normalizar(ev.evento) !== normalizar(ev.local) ? ev.local : '';
   const quando = (ev.data === hoje ? 'Hoje' : diaPorExtenso(ev.data, hoje).replace(/^./, c => c.toUpperCase())) + (horario(ev) ? ', ' + horario(ev) : '');
-  const cardapio = ev.cardapio && ev.data === hoje ? `<a href="#cardapio/${esc(encodeURIComponent(slug(ev.cardapio)))}">⭐ Ver cardápio do evento</a>` : '';
+  const cardapio = temMenuDoEvento(ev, hoje) ? `<a href="#cardapio/${esc(encodeURIComponent(slug(ev.cardapio)))}">📋 Conferir menu</a>` : '';
   return `
     <article class="local${ev.especial ? ' especial' : ''}">
       <div class="topo">
@@ -896,7 +906,9 @@ function htmlLocal(ev, rotulo, hoje){
     </article>`;
 }
 
+let ULTIMA_AGENDA = null;
 function renderAgenda(dados){
+  ULTIMA_AGENDA = dados;
   const faixa = document.getElementById('faixaHoje');
   const caixa = document.getElementById('ondeConteudo');
   const sub = document.getElementById('homeOndeSub');
