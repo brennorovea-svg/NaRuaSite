@@ -90,7 +90,8 @@
   .selo-esgotado{background:var(--red);color:#fff;}
   .selo-breve{background:var(--paper);color:var(--ink-soft);top:auto;bottom:10px;left:auto;right:10px;font-size:10.5px;}
   .prato.esgotado .foto img{filter:grayscale(1) brightness(.85);}
-  .prato.esgotado .preco{background:var(--line);text-decoration:line-through;}
+  .prato.esgotado .preco, .preco.esgotado{background:var(--line);text-decoration:line-through;}
+  .preco .esg{font-family:'Poppins',sans-serif;font-weight:800;font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--red);margin-left:6px;display:inline-block;text-decoration:none;}
 
   .estado{text-align:center;padding:50px 10px;color:var(--paper);}
   .estado .emoji{font-size:44px;display:block;margin-bottom:8px;}
@@ -547,7 +548,10 @@ function htmlPrecos(prato){
     const valor = reais(v.preco);
     if (!valor) return '';
     const tam = varias && v.tamanho ? `<span class="tam">${esc(v.tamanho)}</span>` : '';
-    return `<span class="preco"${v.esgotado ? ' title="Esgotado"' : ''}>${tam}${valor}</span>`;
+    // Um tamanho esgotado (ex.: só o P) fica riscado com "esgotado"; o cartão
+    // inteiro só vira Esgotado quando todos os tamanhos esgotam.
+    const esgotadoSo = v.esgotado && !prato.esgotado;
+    return `<span class="preco${esgotadoSo ? ' esgotado' : ''}"${v.esgotado ? ' title="Esgotado"' : ''}>${tam}${valor}${esgotadoSo ? '<span class="esg">esgotado</span>' : ''}</span>`;
   }).join('');
   if (MOSTRAR_PRECO_IFOOD) {
     const ifood = prato.variantes.map(v => {
