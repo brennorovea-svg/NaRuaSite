@@ -225,6 +225,37 @@
     --hairline-plate:#0f0f0e;--hairline-hi:var(--orange);--hairline-edge:var(--paper);
     --hairline-mid:#9a917d;--hairline-lo:#4d483f;--hairline-stroke:1.3;}
   .truck-read{text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);margin-top:-14px;}
+
+  /* ---------- bebidas em lista, topo compacto no cardápio e acabamentos ---------- */
+  /* ponto 3: bebidas em lista */
+  .lista-bebidas{list-style:none;margin:0;padding:4px 16px;background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:var(--radius);box-shadow:4px 4px 0 rgba(246,175,67,0.55);}
+  .bebida{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1.5px dashed var(--line);}
+  .bebida:last-child{border-bottom:0;}
+  .bebida .mini{flex:0 0 44px;height:44px;border:2px solid var(--ink);border-radius:8px;overflow:hidden;padding:0;cursor:zoom-in;background:#2a2a2a;}
+  .bebida .mini img{width:100%;height:100%;object-fit:cover;display:block;}
+  .bebida .nome{flex:1;min-width:0;font-family:'Titan One',cursive;font-size:17px;line-height:1.2;}
+  .bebida .precos{margin:0;padding:0;flex:0 0 auto;}
+  .bebida.esgotado .nome{color:var(--ink-soft);}
+  .esg-tag{display:inline-block;margin-left:8px;vertical-align:middle;font-family:'Poppins',sans-serif;font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--red);border:2px solid var(--ink);border-radius:999px;padding:1px 7px;}
+  /* ponto 4: topo compacto no cardápio */
+  body[data-tela=cardapio] header{padding:14px 44px 0;}
+  body[data-tela=cardapio] header .wordmark{font-size:32px;-webkit-text-stroke:2px var(--ink);text-shadow:3px 3px 0 var(--orange2);}
+  body[data-tela=cardapio] header .eyebrow, body[data-tela=cardapio] header h1{display:none;}
+  #telaCardapio:has(#catNav:not([hidden])) .voltar-solto{display:none;}
+  .cat-nav{margin-top:6px;}
+  .nav-linha{display:flex;align-items:center;gap:8px;}
+  .nav-linha .lista{flex:1;min-width:0;}
+  .voltar-chip{flex:0 0 auto;margin:0 0 2px;border-radius:999px;padding:7px 12px;font-size:13px;white-space:nowrap;}
+  .bebida.esgotado .preco{background:var(--line);}
+  .bebida.esgotado .preco .v{text-decoration:line-through;}
+  /* ponto 5: acabamentos */
+  ::selection{background:var(--orange);color:var(--ink);}
+  html{accent-color:var(--orange);scrollbar-color:var(--orange2) #1a1a1a;}
+  .voltar:focus-visible, .links a:focus-visible, .bebida .mini:focus-visible{outline:3px solid var(--cyan);outline-offset:2px;}
+  footer{color:#b9b19f;}
+  header .wordmark{animation:entra .7s cubic-bezier(.32,.72,0,1) both;}
+  @keyframes entra{from{opacity:0;transform:translateY(-10px) rotate(-2deg);}}
+  @media (prefers-reduced-motion:reduce){ header .wordmark{animation:none;} }
 </style>
 </head>
 <body>
@@ -317,9 +348,9 @@
   </main>
 
   <div id="telaCardapio" hidden>
-  <div class="wrap tela"><button class="voltar" type="button" data-ir="">← Início</button></div>
+  <div class="wrap tela voltar-solto"><button class="voltar" type="button" data-ir="">← Início</button></div>
   <nav class="cat-nav" id="catNav" aria-label="Categorias" hidden>
-    <div class="wrap"><div class="lista" id="catLista"></div></div>
+    <div class="wrap nav-linha"><button class="voltar voltar-chip" type="button" data-ir="" >← Início</button><div class="lista" id="catLista"></div></div>
   </nav>
 
   <div class="wrap" id="trocaCardapio" hidden></div>
@@ -671,6 +702,26 @@ function render(dados){
   let indice = 0;
   main.innerHTML = categorias.map(cat => {
     const emoji = EMOJI_CATEGORIA[normalizar(cat.nome)] || '🍱';
+    // bebidas: lista simples (nome e preço); a foto, quando existe, vira miniatura
+    if (normalizar(cat.nome) === 'bebidas') {
+      const linhas = cat.pratos.map(p => {
+        const i = indice++;
+        p.src = p.foto || fotoProvisoria(p.nome, i);
+        p.provisoria = !p.foto;
+        p.zoomIdx = PRATOS_COM_ZOOM.push(p) - 1;
+        return `
+          <li class="bebida${p.esgotado ? ' esgotado' : ''}">
+            ${p.foto ? `<button class="mini" type="button" data-zoom="${p.zoomIdx}" aria-label="Ver foto de ${esc(p.nome)}"><img src="${esc(p.src)}" alt="" loading="lazy" decoding="async"></button>` : ''}
+            <span class="nome">${esc(p.nome)}${p.esgotado ? '<span class="esg-tag">esgotado</span>' : ''}</span>
+            <span class="precos">${htmlPrecos(p)}</span>
+          </li>`;
+      }).join('');
+      return `
+      <section class="secao" id="cat-${slug(cat.nome)}" data-cat="${esc(cat.nome)}">
+        <h2 class="secao-titulo"><span class="emoji">${emoji}</span>${esc(cat.nome)}</h2>
+        <ul class="lista-bebidas">${linhas}</ul>
+      </section>`;
+    }
     const cartoes = cat.pratos.map(p => {
       const i = indice++;
       const provisoria = !p.foto;
@@ -845,6 +896,7 @@ function mostrarTela(){
   if (!(nome in TELAS)) nome = '';
   Object.entries(TELAS).forEach(([k, id]) => { document.getElementById(id).hidden = k !== nome; });
   document.title = TITULOS[nome];
+  document.body.dataset.tela = nome || 'inicio';
   if (nome === 'cardapio' && window._obsCat) {
     // recalcula o chip ativo agora que a tela está visível
     document.querySelectorAll('.secao').forEach(s => { window._obsCat.unobserve(s); window._obsCat.observe(s); });
@@ -1108,7 +1160,7 @@ window.hairline = (figure) => {
   stage.setAttribute('data-hairline', figure.name);
   const svg = HL.mk('svg', { viewBox: '0 0 400 320', 'aria-hidden': 'true' }, stage);
   const nomes = { rest: 'passe o dedo na janela' };
-  const read = { set textContent(v) { label.textContent = nomes[v] || (v.endsWith('100%') ? 'janela aberta!' : v); }, get textContent() { return label.textContent; } };
+  const read = { set textContent(v) { const pct = /(\d+)%/.exec(v); label.textContent = pct && +pct[1] >= 50 ? 'janela aberta!' : nomes.rest; }, get textContent() { return label.textContent; } };
   figure.mount({ stage, svg, read }, figure.range[1]);
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) HL.tour(stage, figure.tour || HL.LAP, () => {});
 };
