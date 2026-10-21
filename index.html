@@ -274,6 +274,23 @@
   header .wordmark{animation:entra .7s cubic-bezier(.32,.72,0,1) both;}
   @keyframes entra{from{opacity:0;transform:translateY(-10px) rotate(-2deg);}}
   @media (prefers-reduced-motion:reduce){ header .wordmark{animation:none;} }
+
+  /* food truck: bolinha NARUA na frente, fumacinha da comida e as cozinheiras */
+  .truck .bolinha{fill:var(--orange);stroke:var(--ink);stroke-width:1.6;}
+  .truck .nome{font-family:'Titan One',cursive;font-size:3.7px;fill:var(--ink);stroke:none;letter-spacing:.02em;}
+  .truck .fumaca{fill:none;stroke:var(--paper);stroke-width:2.8;opacity:0;transform-box:fill-box;transform-origin:50% 100%;animation:fumaca 2.6s ease-out infinite;}
+  .truck .f1{animation-delay:.85s;} .truck .f2{animation-delay:1.7s;}
+  @keyframes fumaca{0%{opacity:0;transform:translateY(6px) scaleY(.7);}35%{opacity:.95;}100%{opacity:0;transform:translateY(-16px) scaleY(1.1);}}
+  @media (prefers-reduced-motion:reduce){ .truck .fumaca{animation:none;opacity:.5;} }
+  .truck .cozinheira *{stroke:var(--ink);stroke-width:.7;stroke-linejoin:round;stroke-linecap:round;}
+  .truck .roupa{fill:#141414;stroke:#8f897c;}
+  .truck .sapato{fill:var(--ink);}
+  .truck .c0 .cabelo{fill:#f3d06a;} .truck .c1 .cabelo{fill:#1d1612;}
+  .truck .c0 .pele{fill:#f2cfb1;} .truck .c1 .pele{fill:#e9c29a;}
+  .truck .lenco{fill:var(--orange);} .truck .gato{fill:var(--paper);stroke:none;} .truck .olho{fill:var(--ink);stroke:none;}
+  .truck .sorriso,.truck .olho-linha{fill:none;stroke-width:.55;} .truck .tigela{fill:var(--orange2);}
+  .truck .braco,.truck .perna{fill:none;stroke-width:2.6;}
+  .truck .perna{stroke:#2e2e2e;} .truck .sapato{stroke:#8f897c;} .truck .c0 .braco{stroke:#f2cfb1;} .truck .c1 .braco{stroke:#e9c29a;}
 </style>
 </head>
 <body>

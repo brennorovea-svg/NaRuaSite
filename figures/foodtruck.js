@@ -78,6 +78,14 @@ function mount({ stage, svg, read }, value) {
   mk("path", { d: poly(disco(L + 8.5, 29, 5, W + 0.1)), class: "emblema e0" }, cabG);
   mk("path", { d: poly(disco(L + 9, 28.6, 3, W + 0.1)), class: "emblema e1" }, cabG);
 
+  // on the cab's front, under the windscreen: an orange badge with the name
+  const fx = (z) => lerp(L + CL - 0.6, L + CL - 7.6, (z - Z0) / (ZC - Z0)) + 0.2;
+  const bz = 23, o = P(fx(bz), W / 2, bz), eu = P(fx(bz), W / 2 - 1, bz), ev = P(fx(bz - 1), W / 2, bz - 1);
+  const m = [eu[0] - o[0], eu[1] - o[1], ev[0] - o[0], ev[1] - o[1], o[0], o[1]].map((n) => n.toFixed(3)).join(" ");
+  const selo = mk("g", { transform: "matrix(" + m + ")", class: "selo-frente" }, cabG);
+  mk("circle", { r: 9, class: "bolinha" }, selo);
+  mk("text", { class: "nome", "text-anchor": "middle", y: 1.3 }, selo).textContent = "NARUA";
+
   // the painting on the box's side: arches along the bottom and a disc in the top corner
   const arco = (cx, R) => poly([...Array.from({ length: 19 }, (_, i) => P(cx + R * Math.cos(i * Math.PI / 18), W + 0.1, Z0 + R * Math.sin(i * Math.PI / 18)))]);
   [[19, "a0"], [47, "a1"], [66, "a2"]].forEach(([cx, cor]) => {
@@ -91,6 +99,43 @@ function mount({ stage, svg, read }, value) {
   const onSide = (pts) => pts.map(([x, z]) => P(x, W, z));
   mk("path", { d: poly(onSide(fillet([[WX0, WZ0], [WX1, WZ0], [WX1, WZ1], [WX0, WZ1]], [2, 2, 2, 2]))), class: "moldura" }, g);
   mk("path", { d: poly(onSide(fillet([[WX0 + 3, WZ0 + 3], [WX1 - 3, WZ0 + 3], [WX1 - 3, WZ1 - 3], [WX0 + 3, WZ1 - 3]], [1, 1, 1, 1]))), class: "dentro" }, g);
+  // our two cooks, drawn flat and facing the viewer, local y pointing down from the feet:
+  // one stands on the ground beside the truck, the other works inside, seen from the waist up in the window
+  const plano = (x, y, z, s) => {
+    const o = P(x, y, z), eu = P(x + s, y, z), ev = P(x, y, z - s);
+    return [eu[0] - o[0], eu[1] - o[1], ev[0] - o[0], ev[1] - o[1], o[0], o[1]].map((n) => n.toFixed(3)).join(" ");
+  };
+  const cozinheira = (x, k, dentro) => {
+    const at = dentro ? plano(x, W, WZ0 - 12, 1) : plano(x, W + 7, 0, 1.25);
+    const c = mk("g", { transform: "matrix(" + at + ")", class: "cozinheira c" + k }, g);
+    const d = (cls, path) => mk("path", { d: path, class: cls }, c);
+    if (k === 0) d("cabelo", "M 2.5 -31.5 Q 8 -30 6.5 -22.5 Q 5.5 -26 2.8 -27.5 Z");
+    if (k === 1) d("cabelo", "M -4.6 -31 Q -5.4 -27 -4.8 -24.6 L 4.8 -24.6 Q 5.4 -27 4.6 -31 Z");
+    if (!dentro) d("perna", "M -3.6 -13 L -3.4 -1 M 3.6 -13 L 3.4 -1");
+    if (!dentro) d("sapato", "M -5.6 0 Q -5.6 -1.6 -3.4 -1.6 Q -1.6 -1.6 -1.6 0 Z M 1.6 0 Q 1.6 -1.6 3.4 -1.6 Q 5.6 -1.6 5.6 0 Z");
+    d("roupa", "M -6 -12 L -6.3 -20.5 Q -6.3 -24.4 -2.5 -24.4 L 2.5 -24.4 Q 6.3 -24.4 6.3 -20.5 L 6 -12 Z");
+    if (k === 0) { d("braco", "M -6 -22 Q -8.5 -17 -7.5 -13"); d("braco", "M 6 -22.5 Q 10 -25 10.5 -30"); }
+    else { d("braco", "M -6 -22 Q -7.5 -18 -3 -17"); d("braco", "M 6 -22 Q 7.5 -18 3 -17"); }
+    mk("rect", { x: -1.2, y: -26, width: 2.4, height: 2, class: "pele" }, c);
+    mk("circle", { cy: -28.4, r: 3.5, class: "pele" }, c);
+    d("cabelo franja", "M -3.6 -28.6 Q -3.8 -31.6 0 -31.7 Q 3.8 -31.6 3.6 -28.6 Q 1.5 -29.8 0 -28.9 Q -1.5 -29.8 -3.6 -28.6 Z");
+    if (k === 1) d("lenco", "M -3.5 -30.6 Q -3.6 -33.6 0 -33.6 Q 3.6 -33.6 3.5 -30.6 Q 0 -31.9 -3.5 -30.6 Z");
+    if (k === 0) {
+      mk("circle", { cx: -1.25, cy: -28.1, r: 0.45, class: "olho" }, c);
+      mk("circle", { cx: 1.25, cy: -28.1, r: 0.45, class: "olho" }, c);
+      mk("circle", { cx: 10.6, cy: -30.6, r: 1.3, class: "pele mao" }, c);
+    } else {
+      d("olho-linha", "M -2.1 -28 Q -1.3 -27.5 -0.6 -28 M 0.6 -28 Q 1.3 -27.5 2.1 -28");
+      // a kitten's face on her shirt, as its logo
+      d("gato", "M -2 -21.4 L -2.1 -24.3 L -0.8 -23 Q 0 -23.2 0.8 -23 L 2.1 -24.3 L 2 -21.4 Q 1.9 -19.8 0 -19.8 Q -1.9 -19.8 -2 -21.4 Z");
+      mk("circle", { cx: -0.75, cy: -21.6, r: 0.32, class: "olho" }, c);
+      mk("circle", { cx: 0.75, cy: -21.6, r: 0.32, class: "olho" }, c);
+      d("tigela", "M -4.2 -17.6 L 4.2 -17.6 Q 4 -14 0 -14 Q -4 -14 -4.2 -17.6 Z");
+    }
+    d("sorriso", "M -1.2 -26.8 Q 0 -25.9 1.2 -26.8");
+  };
+  cozinheira(WX0 + 31.5, 1, true);
+
   const [kr, ki] = rings(WX0 - 3, W, WX1 + 3, W + 7, 1.5, 0.7);
   put(solid(layer("balcao")), prism(P, front, kr, ki, WZ0 - 2.4, WZ0));
   // three dots on the counter: what is being served
@@ -128,6 +173,16 @@ function mount({ stage, svg, read }, value) {
   }
   draw();
 
+  // the cook outside stands nearer the viewer than the hatch, so she is painted after it
+  cozinheira(5, 0, false);
+
+  // steam from the food, rising in front of the window (the page's CSS animates it)
+  const fg = layer("fumaca");
+  [[WX0 + 12, 0], [WX0 + 25, 1], [WX0 + 38, 2]].forEach(([x, k]) => {
+    const [sx, sy] = P(x, W + 5, WZ1 - 4);
+    mk("path", { d: "M" + sx.toFixed(1) + " " + sy.toFixed(1) + " c -4 -5 4 -9 0 -14 s -4 -9 0 -14", class: "nf fumaca f" + k }, fg);
+  });
+
   const B = register(stage, (dt) => { const m = stepS(open1, dt); draw(); return m; });
   bag.add(B.unregister);
 
@@ -159,7 +214,7 @@ hairline({
   name: "foodtruck",
   means: "A food truck: bring the pointer to its window and the hatch lifts into an awning, ready to serve.",
   rules: [1, 3, 5, 8, 9],
-  range: [70, 92, 112],
+  range: [70, 128, 140],
   tour: [[150, 250], [230, 200], [320, 110], null],
   mount,
 });
