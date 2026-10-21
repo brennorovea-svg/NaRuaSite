@@ -128,9 +128,9 @@ function mount({ stage, svg, read }, value) {
     }
     d("sorriso", "M -1.2 -26.8 Q 0 -25.9 1.2 -26.8");
     // a kitten's face on the shirt, as its logo
-    d("gato", "M -2 -21.4 L -2.1 -24.3 L -0.8 -23 Q 0 -23.2 0.8 -23 L 2.1 -24.3 L 2 -21.4 Q 1.9 -19.8 0 -19.8 Q -1.9 -19.8 -2 -21.4 Z");
-    mk("circle", { cx: -0.75, cy: -21.6, r: 0.32, class: "olho" }, c);
-    mk("circle", { cx: 0.75, cy: -21.6, r: 0.32, class: "olho" }, c);
+    d("gato", "M -2 -19.2 L -2.1 -22.1 L -0.8 -20.8 Q 0 -21.0 0.8 -20.8 L 2.1 -22.1 L 2 -19.2 Q 1.9 -17.6 0 -17.6 Q -1.9 -17.6 -2 -19.2 Z");
+    mk("circle", { cx: -0.75, cy: -19.4, r: 0.32, class: "olho" }, c);
+    mk("circle", { cx: 0.75, cy: -19.4, r: 0.32, class: "olho" }, c);
   };
   cozinheira(WX0 + 9, 1, true);
 
