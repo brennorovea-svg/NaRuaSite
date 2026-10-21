@@ -219,6 +219,12 @@
     .precos{padding-top:4px;}
     .preco{font-size:16px;padding:3px 9px;}
   }
+
+  /* ---------- food truck animado da tela inicial (figures/foodtruck.js) ---------- */
+  .truck{margin:0 auto 10px;max-width:340px;
+    --hairline-plate:#0f0f0e;--hairline-hi:var(--orange);--hairline-edge:var(--paper);
+    --hairline-mid:#9a917d;--hairline-lo:#4d483f;--hairline-stroke:1.3;}
+  .truck-read{text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);margin-top:-14px;}
 </style>
 </head>
 <body>
@@ -286,6 +292,11 @@
         </span>
         <span class="ir">›</span>
       </button>
+      <!-- food truck animado (motor Hairline, figures/): o toldo abre quando o dedo chega na janela -->
+      <figure class="truck" aria-hidden="true">
+        <div class="truck-stage" data-truck></div>
+        <figcaption class="truck-read" data-truck-read>passe o dedo na janela</figcaption>
+      </figure>
       <div class="home-grid" id="homeGrid">
         <button class="home-card c-yellow" type="button" data-ir="cardapio">
           <span class="icon">🍜</span>
@@ -1088,5 +1099,21 @@ async function iniciar(){
 
 iniciar();
 </script>
+<script>
+// Recebe a figura (figures/foodtruck.js chama hairline({...})) e monta no palco da tela inicial.
+window.hairline = (figure) => {
+  const stage = document.querySelector('[data-truck]'), label = document.querySelector('[data-truck-read]');
+  if (!stage || !window.HL) return;
+  HL.inject(document);
+  stage.setAttribute('data-hairline', figure.name);
+  const svg = HL.mk('svg', { viewBox: '0 0 400 320', 'aria-hidden': 'true' }, stage);
+  const nomes = { rest: 'passe o dedo na janela' };
+  const read = { set textContent(v) { label.textContent = nomes[v] || (v.endsWith('100%') ? 'janela aberta!' : v); }, get textContent() { return label.textContent; } };
+  figure.mount({ stage, svg, read }, figure.range[1]);
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) HL.tour(stage, figure.tour || HL.LAP, () => {});
+};
+</script>
+<script src="figures/hairline-kernel.js"></script>
+<script type="module" src="figures/foodtruck.js"></script>
 </body>
 </html>
