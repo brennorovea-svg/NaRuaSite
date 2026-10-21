@@ -1178,7 +1178,8 @@ window.hairline = (figure) => {
   stage.setAttribute('data-hairline', figure.name);
   const svg = HL.mk('svg', { viewBox: '0 0 400 320', 'aria-hidden': 'true' }, stage);
   const nomes = { rest: 'Bem-vindo ao Narua!' };
-  const read = { set textContent(v) { const pct = /(\d+)%/.exec(v); label.textContent = pct && +pct[1] >= 50 ? 'janela aberta!' : nomes.rest; }, get textContent() { return label.textContent; } };
+  // a legenda fica sempre nas boas-vindas; a figura só mexe o toldo
+  const read = { set textContent(v) { label.textContent = nomes.rest; }, get textContent() { return label.textContent; } };
   figure.mount({ stage, svg, read }, figure.range[1]);
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) HL.tour(stage, figure.tour || HL.LAP, () => {});
 };
