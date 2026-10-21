@@ -280,6 +280,7 @@
   .truck .nome{font-family:'Titan One',cursive;font-size:3.7px;fill:var(--ink);stroke:none;letter-spacing:.02em;}
   .truck .fumaca{fill:none;stroke:var(--paper);stroke-width:2.8;opacity:0;transform-box:fill-box;transform-origin:50% 100%;animation:fumaca 2.6s ease-out infinite;}
   .truck .f1{animation-delay:.85s;} .truck .f2{animation-delay:1.7s;}
+  .truck .t-fumaca{opacity:0;transition:opacity .7s ease;} .truck .t-fumaca.on{opacity:1;}
   @keyframes fumaca{0%{opacity:0;transform:translateY(6px) scaleY(.7);}35%{opacity:.95;}100%{opacity:0;transform:translateY(-16px) scaleY(1.1);}}
   @media (prefers-reduced-motion:reduce){ .truck .fumaca{animation:none;opacity:.5;} }
   .truck .cozinheira *{stroke:var(--ink);stroke-width:.7;stroke-linejoin:round;stroke-linecap:round;}

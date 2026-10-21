@@ -1,21 +1,19 @@
 /**
  * Food truck (like the real Narua truck: white cab, black box painted with arches): a truck parked with its serving side to the viewer. A long box
  * body, a cabin narrower at the top with a sloping windscreen, two wheels, a
- * serving window with a counter, and a hatch hinged over the window. The
- * pointer's nearness to the window lifts the hatch into an awning on its two
- * struts: near, it opens wide and takes the bright stroke; far, it settles
- * back almost shut, its lip the one bright line. The slider is how far the
- * hatch opens, in degrees.
+ * serving window with a counter, and a hatch hinged over the window, always
+ * held open as an awning on its two struts. Moving the pointer over the
+ * figure sets the food steaming; when it stops, the steam fades. The slider is
+ * how far the hatch opens, in degrees.
  */
 const {
-  Cam, clamp, facing, fillet, fit, hull, lerp, open, poly, prism, proj, rad, ringAt, rings, rrect, run, seg,
-  spring, stepS, unproj, disposer, mk, place, pointer, put, register, solid,
+  Cam, facing, fillet, fit, hull, lerp, open, poly, prism, proj, rad, ringAt, rings, rrect, run, seg,
+  disposer, mk, place, pointer, put, register, solid,
 } = HL;
 
 const L = 84, CL = 26, W = 46, Z0 = 11, ZB = 64, ZC = 54;
 const WX0 = 16, WX1 = 66, WZ0 = 30, WZ1 = 52, HZ = 55, HD = 26, TK = 1.4;
-const REST = 24, WR = 10, AX = [20, 92];
-const SPOT = [(WX0 + WX1) / 2, W + 30], NEAR = 26, FAR = 90;
+const WR = 10, AX = [20, 92], CALMA = 1800;
 
 /** A wheel standing on the near side at x: tyre, rim and hub, as projected rings in the x-z plane. */
 function wheel(P, cx) {
@@ -134,7 +132,7 @@ function mount({ stage, svg, read }, value) {
     }
     d("sorriso", "M -1.2 -26.8 Q 0 -25.9 1.2 -26.8");
   };
-  cozinheira(WX0 + 31.5, 1, true);
+  cozinheira(WX0 + 9, 1, true);
 
   const [kr, ki] = rings(WX0 - 3, W, WX1 + 3, W + 7, 1.5, 0.7);
   put(solid(layer("balcao")), prism(P, front, kr, ki, WZ0 - 2.4, WZ0));
@@ -160,10 +158,9 @@ function mount({ stage, svg, read }, value) {
   const listras = [0, 1, 2, 3, 4].map(() => mk("path", { class: "listra" }, hg));
   const lip = mk("path", { class: "nf lo" }, hg);
 
-  const open1 = spring(0);
   let drawn = NaN;
   function draw() {
-    const a = lerp(REST, MAX, clamp(open1.x, 0, 1.05));
+    const a = MAX;
     if (a === drawn) return;
     drawn = a;
     const q = hatch(P, shape, a);
@@ -173,35 +170,32 @@ function mount({ stage, svg, read }, value) {
   }
   draw();
 
-  // the cook outside stands nearer the viewer than the hatch, so she is painted after it
-  cozinheira(5, 0, false);
+  face.classList.add("hi");
 
-  // steam from the food, rising in front of the window (the page's CSS animates it)
+  // the cook outside stands by the cab, nearer the viewer than the hatch, so she is painted after it
+  cozinheira(76, 0, false);
+
+  // steam from the food, rising in front of the window (the page's CSS animates it, and fades it in while the pointer moves)
   const fg = layer("fumaca");
   [[WX0 + 12, 0], [WX0 + 25, 1], [WX0 + 38, 2]].forEach(([x, k]) => {
     const [sx, sy] = P(x, W + 5, WZ1 - 4);
     mk("path", { d: "M" + sx.toFixed(1) + " " + sy.toFixed(1) + " c -4 -5 4 -9 0 -14 s -4 -9 0 -14", class: "nf fumaca f" + k }, fg);
   });
 
-  const B = register(stage, (dt) => { const m = stepS(open1, dt); draw(); return m; });
+  const B = register(stage, () => { draw(); return false; });
   bag.add(B.unregister);
 
-  /** How open the hatch wants to be, from the pointer's spot on the ground: 1 near the window, falling to 0. */
-  function aim(p) {
-    let t = 0;
-    if (p) {
-      const [x, y] = unproj(C, p[0], p[1], 0), d = Math.hypot(x - SPOT[0], y - SPOT[1]);
-      t = d < NEAR ? 1 : d > FAR ? 0 : 1 - (d - NEAR) / (FAR - NEAR);
-    }
-    open1.t = t;
-    const on = t > 0.5;
-    face.classList.toggle("hi", on); lip.classList.toggle("hi", !on);
-    read.textContent = t === 0 ? "rest" : `janela ${String(Math.round(t * 100)).padStart(2, "0")}%`;
-    B.wake();
+  /** Each move of the pointer sets the food steaming; it fades once the pointer has been still for a while. */
+  let calma = 0;
+  function mexe() {
+    fg.classList.add("on");
+    clearTimeout(calma);
+    calma = setTimeout(() => fg.classList.remove("on"), CALMA);
   }
-  aim(null);
+  read.textContent = "rest";
+  bag.add(() => clearTimeout(calma));
 
-  bag.add(pointer(stage, { move: (p) => aim(p), leave: () => aim(null) }));
+  bag.add(pointer(stage, { move: mexe, leave: () => {} }));
   bag.add(() => svg.replaceChildren());
 
   return {
@@ -212,9 +206,9 @@ function mount({ stage, svg, read }, value) {
 
 hairline({
   name: "foodtruck",
-  means: "A food truck: bring the pointer to its window and the hatch lifts into an awning, ready to serve.",
+  means: "A food truck with its window open: move the pointer over it and the food starts steaming.",
   rules: [1, 3, 5, 8, 9],
-  range: [70, 128, 140],
+  range: [70, 140, 140],
   tour: [[150, 250], [230, 200], [320, 110], null],
   mount,
 });
