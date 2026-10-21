@@ -80,9 +80,10 @@
   .tag-veg{align-self:flex-start;font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#1f6b36;background:#dff3e4;border:2px solid var(--green);border-radius:999px;padding:2px 9px;}
   .prato .desc{font-size:13.5px;line-height:1.45;color:var(--ink-soft);margin:0;}
   .precos{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:8px;align-items:center;}
-  .preco{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:16px;background:var(--orange);border:2px solid var(--ink);border-radius:8px;padding:4px 10px;white-space:nowrap;}
-  .preco .tam{font-family:'Poppins',sans-serif;font-weight:700;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;margin-right:6px;}
-  .preco-ifood{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);width:100%;}
+  .preco{font-family:'Poppins',sans-serif;font-weight:800;font-size:17px;line-height:1.2;font-variant-numeric:tabular-nums;letter-spacing:-.01em;background:var(--orange);border:2px solid var(--ink);border-radius:8px;padding:4px 11px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:3px;}
+  .preco .rs{font-weight:700;font-size:.68em;letter-spacing:0;margin-right:3px;}
+  .preco .tam{font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase;margin-right:4px;padding:1px 5px;border-radius:4px;background:var(--ink);color:var(--orange);align-self:center;}
+  .preco-ifood{font-family:'Poppins',sans-serif;font-weight:500;font-variant-numeric:tabular-nums;font-size:12px;color:var(--ink-soft);width:100%;}
 
   .tag-exclusivo{align-self:flex-start;font-family:'Poppins',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);background:var(--orange);border:2px solid var(--ink);border-radius:999px;padding:2px 9px;}
   .prato.exclusivo{box-shadow:5px 5px 0 var(--orange);border-color:var(--orange);}
@@ -90,7 +91,8 @@
   .selo-esgotado{background:var(--red);color:#fff;}
   .selo-breve{background:var(--paper);color:var(--ink-soft);top:auto;bottom:10px;left:auto;right:10px;font-size:10.5px;}
   .prato.esgotado .foto img{filter:grayscale(1) brightness(.85);}
-  .prato.esgotado .preco, .preco.esgotado{background:var(--line);text-decoration:line-through;}
+  .prato.esgotado .preco, .preco.esgotado{background:var(--line);}
+  .prato.esgotado .preco .v, .preco.esgotado .v{text-decoration:line-through;}
   .preco .esg{font-family:'Poppins',sans-serif;font-weight:800;font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--red);margin-left:6px;display:inline-block;text-decoration:none;}
 
   .estado{text-align:center;padding:50px 10px;color:var(--paper);}
@@ -202,6 +204,20 @@
     html{scroll-behavior:auto;}
     .prato .foto img{transition:none;}
     .esqueleto{animation:none;}
+  }
+
+  /* ---------- cardápio compacto no celular: foto ao lado do texto ---------- */
+  @media (max-width:600px){
+    .grade{gap:12px;}
+    .prato{flex-direction:row;align-items:stretch;box-shadow:4px 4px 0 rgba(246,175,67,0.55);}
+    .prato .foto{width:118px;flex:0 0 118px;aspect-ratio:auto;min-height:118px;border-bottom:0;border-right:2px solid var(--ink);}
+    .prato .corpo{padding:11px 12px 12px;gap:5px;min-width:0;}
+    .prato h3{font-size:18px;}
+    .prato .desc{font-size:13px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+    .selo{top:6px;left:6px;font-size:10px;padding:2px 7px;}
+    .selo-breve{display:none;}
+    .precos{padding-top:4px;}
+    .preco{font-size:16px;padding:3px 9px;}
   }
 </style>
 </head>
@@ -551,7 +567,7 @@ function htmlPrecos(prato){
     // Um tamanho esgotado (ex.: só o P) fica riscado com "esgotado"; o cartão
     // inteiro só vira Esgotado quando todos os tamanhos esgotam.
     const esgotadoSo = v.esgotado && !prato.esgotado;
-    return `<span class="preco${esgotadoSo ? ' esgotado' : ''}"${v.esgotado ? ' title="Esgotado"' : ''}>${tam}${valor}${esgotadoSo ? '<span class="esg">esgotado</span>' : ''}</span>`;
+    return `<span class="preco${esgotadoSo ? ' esgotado' : ''}"${v.esgotado ? ' title="Esgotado"' : ''}>${tam}<span class="v">${valor.replace('R$ ', '<span class="rs">R$</span>')}</span>${esgotadoSo ? '<span class="esg">esgotado</span>' : ''}</span>`;
   }).join('');
   if (MOSTRAR_PRECO_IFOOD) {
     const ifood = prato.variantes.map(v => {
