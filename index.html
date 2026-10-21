@@ -696,10 +696,10 @@ function htmlPrecos(prato){
 
 // v11: cardápio especial por evento. dados.especiais = [{nome, eventos:[{data,
 // local, evento}], itens}]: a planilha manda os cardápios dos eventos da
-// agenda de hoje em diante (Apps Script v13; até a v12, só os de hoje). O
-// cliente pode ver o "Menu do evento X" antes do dia pelo botão "Conferir
-// menu"; no dia, a tela Cardápio já abre nele, com um botão para o de sempre.
-// O link #cardapio/<nome> abre um cardápio específico.
+// agenda de hoje em diante (Apps Script v13; até a v12, só os de hoje).
+// Regra do Brenno (21/10): nunca os dois juntos. No dia do evento o site mostra
+// SÓ o cardápio do evento; nos outros dias, SÓ o cardápio de sempre (o menu do
+// evento não aparece antes do dia, nem por link #cardapio/<nome>).
 let DADOS_CARDAPIO = null;
 function especiaisDe(dados){
   return (dados && Array.isArray(dados.especiais) ? dados.especiais : []).filter(c => c && c.nome && Array.isArray(c.itens) && c.itens.length);
@@ -708,48 +708,42 @@ function cardapioPedido(){
   const m = location.hash.match(/^#cardapio\/(.+)$/);
   return m ? decodeURIComponent(m[1]) : '';
 }
-function especialDeHoje(dados){
+function especiaisDeHoje(dados){
   const hoje = agoraSP().data;
-  return especiaisDe(dados).find(c => (c.eventos || []).some(ev => ev.data === hoje)) || null;
+  return especiaisDe(dados).filter(c => (c.eventos || []).some(ev => ev.data === hoje));
+}
+function especialDeHoje(dados){
+  return especiaisDeHoje(dados)[0] || null;
 }
 function escolherCardapio(dados){
+  // Só os cardápios de hoje podem ser escolhidos (dois eventos especiais no
+  // mesmo dia com cardápios diferentes: o link escolhe entre eles). Fora do
+  // dia do evento, qualquer link cai no cardápio de sempre.
   const pedido = cardapioPedido();
-  // No dia do evento o site só mostra o cardápio do evento (pedido do Brenno,
-  // 20/10): o "Cardápio de sempre" some e o link #cardapio/normal cai nele.
-  if (pedido === 'normal') return especialDeHoje(dados);
+  const deHoje = especiaisDeHoje(dados);
   if (pedido) {
-    const achado = especiaisDe(dados).find(c => slug(c.nome) === slug(pedido));
+    const achado = deHoje.find(c => slug(c.nome) === slug(pedido));
     if (achado) return achado;
   }
-  return especialDeHoje(dados);
-}
-function dataCurta(d){
-  const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  return m ? m[3] + '/' + m[2] : '';
+  return deHoje[0] || null;
 }
 function tituloEspecial(c){
   const nomes = [];
   (c.eventos || []).forEach(ev => { const n = maiuscula(ev.evento || ev.local || ''); if (n && !nomes.some(x => normalizar(x) === normalizar(n))) nomes.push(n); });
   return 'Menu do evento ' + (nomes.join(' / ') || c.nome);
 }
-function quandoEspecial(c){
-  const hoje = agoraSP().data;
-  return (c.eventos || []).map(ev => diaPorExtenso(ev.data, hoje) + (ev.local ? ' · ' + ev.local : '')).join(', ');
-}
 function renderTroca(dados, escolhido){
   const caixa = document.getElementById('trocaCardapio');
-  const lista = especiaisDe(dados);
-  if (!lista.length) { caixa.hidden = true; caixa.innerHTML = ''; return; }
-  const deHoje = especialDeHoje(dados);
-  const chips = (deHoje ? [] : [`<button class="chip${escolhido ? '' : ' ativo'}" type="button" data-cardapio="normal">🍜 Cardápio de sempre</button>`])
-    .concat(lista.map(c => `<button class="chip${escolhido === c ? ' ativo' : ''}" type="button" data-cardapio="${esc(slug(c.nome))}">⭐ ${esc(tituloEspecial(c))}</button>`));
+  // Sem chip "Cardápio de sempre" e sem menus de outros dias: só aparecem os
+  // cardápios de hoje (normalmente um só, então nenhum chip).
+  const lista = especiaisDeHoje(dados);
+  if (!lista.length || !escolhido) { caixa.hidden = true; caixa.innerHTML = ''; return; }
+  const chips = lista.map(c => `<button class="chip${escolhido === c ? ' ativo' : ''}" type="button" data-cardapio="${esc(slug(c.nome))}">⭐ ${esc(tituloEspecial(c))}</button>`);
   caixa.hidden = false;
-  const hojeEsc = escolhido && escolhido === deHoje;
-  const temExclusivo = escolhido && escolhido.itens.some(it => it.exclusivo === true);
+  const temExclusivo = escolhido.itens.some(it => it.exclusivo === true);
   caixa.innerHTML = (chips.length > 1 ? `<div class="troca-cardapio">${chips.join('')}</div>` : '') +
-    (escolhido ? `<div class="faixa-especial">⭐ <b>${esc(tituloEspecial(escolhido))}</b><br>` +
-      (hojeEsc ? `Hoje vale este cardápio${temExclusivo ? ', com itens que só existem no evento' : ''}.`
-        : `Vale ${esc(quandoEspecial(escolhido))}.${temExclusivo ? ' Os itens marcados ⭐ só existem no dia do evento.' : ''} Até lá, vale o cardápio de sempre.`) + `</div>` : '');
+    `<div class="faixa-especial">⭐ <b>${esc(tituloEspecial(escolhido))}</b><br>` +
+      `Hoje vale este cardápio${temExclusivo ? ', com itens que só existem no evento' : ''}.</div>`;
   caixa.querySelectorAll('[data-cardapio]').forEach(b => b.addEventListener('click', () => irPara('cardapio/' + b.dataset.cardapio)));
 }
 
@@ -759,8 +753,7 @@ function render(dados){
   renderTroca(dados, escolhido);
   // o botão "Conferir menu" do Onde estamos depende do cardápio já carregado
   if (ULTIMA_AGENDA) renderAgenda(ULTIMA_AGENDA);
-  TEXTO_EXCLUSIVO = escolhido && escolhido === especialDeHoje(dados) ? '⭐ Só hoje, no evento'
-    : '⭐ Só no dia do evento' + (escolhido && escolhido.eventos && escolhido.eventos[0] ? ' (' + dataCurta(escolhido.eventos[0].data) + ')' : '');
+  TEXTO_EXCLUSIVO = '⭐ Só hoje, no evento';
   const categorias = montarCategorias(escolhido ? escolhido.itens : dados.itens);
   const main = document.getElementById('conteudo');
   document.getElementById('avisoExemplo').hidden = !dados.exemplo;
@@ -1062,11 +1055,11 @@ function organizarAgenda(dados){
   return { hojeData: agora.data, hoje, proximo, especiais, seguintes };
 }
 
-// Botão "Conferir menu": aparece em qualquer dia, mas só se o cardápio do
-// evento já está cadastrado na aba "Cardápios especiais" (a planilha só manda
-// os cardápios que existem e estão ligados a um evento da agenda).
+// Botão "Conferir menu": só no dia do evento (regra de 21/10: antes do dia o
+// menu do evento não aparece) e só se o cardápio está cadastrado na aba
+// "Cardápios especiais".
 function temMenuDoEvento(ev){
-  if (!ev.cardapio) return false;
+  if (!ev.cardapio || ev.data !== agoraSP().data) return false;
   return especiaisDe(DADOS_CARDAPIO).some(c => slug(c.nome) === slug(ev.cardapio) && (c.eventos || []).some(e => e.data === ev.data));
 }
 
