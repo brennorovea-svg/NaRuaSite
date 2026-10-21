@@ -124,13 +124,13 @@ function mount({ stage, svg, read }, value) {
       mk("circle", { cx: 10.6, cy: -30.6, r: 1.3, class: "pele mao" }, c);
     } else {
       d("olho-linha", "M -2.1 -28 Q -1.3 -27.5 -0.6 -28 M 0.6 -28 Q 1.3 -27.5 2.1 -28");
-      // a kitten's face on her shirt, as its logo
-      d("gato", "M -2 -21.4 L -2.1 -24.3 L -0.8 -23 Q 0 -23.2 0.8 -23 L 2.1 -24.3 L 2 -21.4 Q 1.9 -19.8 0 -19.8 Q -1.9 -19.8 -2 -21.4 Z");
-      mk("circle", { cx: -0.75, cy: -21.6, r: 0.32, class: "olho" }, c);
-      mk("circle", { cx: 0.75, cy: -21.6, r: 0.32, class: "olho" }, c);
       d("tigela", "M -4.2 -17.6 L 4.2 -17.6 Q 4 -14 0 -14 Q -4 -14 -4.2 -17.6 Z");
     }
     d("sorriso", "M -1.2 -26.8 Q 0 -25.9 1.2 -26.8");
+    // a kitten's face on the shirt, as its logo
+    d("gato", "M -2 -21.4 L -2.1 -24.3 L -0.8 -23 Q 0 -23.2 0.8 -23 L 2.1 -24.3 L 2 -21.4 Q 1.9 -19.8 0 -19.8 Q -1.9 -19.8 -2 -21.4 Z");
+    mk("circle", { cx: -0.75, cy: -21.6, r: 0.32, class: "olho" }, c);
+    mk("circle", { cx: 0.75, cy: -21.6, r: 0.32, class: "olho" }, c);
   };
   cozinheira(WX0 + 9, 1, true);
 
