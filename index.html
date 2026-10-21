@@ -173,6 +173,7 @@
   .proximos .nome{font-weight:700;font-size:14px;}
   .proximos .end{font-size:12.5px;color:#a9a294;}
   .proximos a{color:var(--cyan);font-size:12.5px;font-weight:600;margin-left:auto;white-space:nowrap;}
+  .proximos li.especial{border-color:var(--orange);}
   .sem-evento{text-align:center;padding:34px 18px 28px;}
   .sem-evento .emoji{font-size:44px;display:block;margin-bottom:6px;}
   .sem-evento p{margin:4px 0;font-size:14px;color:var(--ink-soft);}
@@ -1012,10 +1013,17 @@ function organizarAgenda(dados){
   const resto = eventos.filter(ev => ev !== hoje);
   const proximo = hoje ? null : (resto[0] || null);
   // Eventos especiais aparecem TODOS, numa seção própria (fora do limite dos
-  // próximos eventos); a lista "Próximos eventos" fica só com os comuns.
+  // próximos eventos) e TAMBÉM na lista "Próximos eventos", em ordem de data:
+  // a lista mostra os próximos MAX_PROXIMOS eventos comuns mais todos os
+  // especiais, mesmo que já tenham destaque acima.
   const especiais = resto.filter(ev => ev.especial && ev !== proximo);
-  const comuns = resto.filter(ev => !ev.especial && ev !== proximo);
-  return { hojeData: agora.data, hoje, proximo, especiais, seguintes: comuns.slice(0, MAX_PROXIMOS) };
+  const seguintes = [];
+  let comuns = 0;
+  resto.filter(ev => ev !== proximo).forEach(ev => {
+    if (ev.especial) seguintes.push(ev);
+    else if (comuns < MAX_PROXIMOS) { seguintes.push(ev); comuns++; }
+  });
+  return { hojeData: agora.data, hoje, proximo, especiais, seguintes };
 }
 
 // Botão "Conferir menu": aparece em qualquer dia, mas só se o cardápio do
@@ -1090,9 +1098,9 @@ function renderAgenda(dados){
   }
   if (ag.seguintes.length) {
     html += `<section class="proximos"><h3>Próximos eventos</h3><ul>` + ag.seguintes.map(ev => `
-      <li>
+      <li${ev.especial ? ' class="especial"' : ''}>
         <span class="dia">${esc(diaPorExtenso(ev.data, ag.hojeData))}</span>
-        <span><span class="nome">${esc(ev.evento || ev.local)}${ev.evento && ev.local && ev.evento !== ev.local ? ' · ' + esc(ev.local) : ''}</span><br><span class="end">${esc([horario(ev), ev.endereco].filter(Boolean).join(' · '))}</span></span>
+        <span><span class="nome">${ev.especial ? '⭐ ' : ''}${esc(ev.evento || ev.local)}${ev.evento && ev.local && ev.evento !== ev.local ? ' · ' + esc(ev.local) : ''}</span><br><span class="end">${esc([horario(ev), ev.endereco].filter(Boolean).join(' · '))}</span></span>
         <a href="${esc(urlAbrirMapa(ev))}" target="_blank" rel="noopener">Ver no mapa ›</a>
       </li>`).join('') + `</ul></section>`;
   }
