@@ -222,8 +222,26 @@
 
   /* ---------- food truck animado da tela inicial (figures/foodtruck.js) ---------- */
   .truck{margin:0 auto 10px;max-width:340px;
-    --hairline-plate:#0f0f0e;--hairline-hi:var(--orange);--hairline-edge:var(--paper);
-    --hairline-mid:#9a917d;--hairline-lo:#4d483f;--hairline-stroke:1.3;}
+    --hairline-plate:var(--paper);--hairline-edge:var(--ink);--hairline-mid:var(--ink);--hairline-lo:rgba(24,24,24,.5);--hairline-hi:var(--orange);--hairline-stroke:1.7;}
+  /* cores do truck de verdade: cabine branca, baú preto pintado com arcos, rodas de aro amarelo */
+  .truck .t-chao path:not(.nf){fill:#2b2723;stroke:#5c564a;}
+  .truck .t-corpo path:not(.nf){fill:#161616;stroke:#8d8676;}
+  .truck .t-corpo path.nf{stroke:#3a3732;}
+  .truck .t-teto path:not(.nf){fill:#2a2a2a;stroke:#8d8676;}
+  .truck .t-cabine path:not(.nf){fill:#f4f1ea;}
+  .truck .t-cabine path.vidro{fill:#2d3940;}
+  .truck path.emblema{stroke:none;} .truck .t-cabine path.e0{fill:var(--red);} .truck .t-cabine path.e1{fill:var(--orange);}
+  .truck .arco{stroke:none;} .truck .a0{fill:var(--cyan);} .truck .a1{fill:var(--red);} .truck .a2{fill:var(--orange);} .truck .a3{fill:#161616;}
+  .truck .moldura{fill:#161616;stroke:#c9c6bd;}
+  .truck .dentro{fill:#2d3940;stroke:#c9c6bd;}
+  .truck .t-balcao path:not(.nf){fill:#c9c6bd;}
+  .truck .dot.prato{stroke:var(--ink);stroke-width:1;}
+  .truck .dot.p0{fill:var(--orange);} .truck .dot.p1{fill:var(--green);} .truck .dot.p2{fill:#fff;}
+  .truck .pneu{fill:var(--ink);stroke:#5c564a;} .truck .aro{fill:#f2c230;} .truck .cubo{fill:var(--red);}
+  .truck .t-toldo .listra{display:none;}
+  .truck .t-toldo path.sil{fill:#161616;stroke:#c9c6bd;} .truck .t-toldo path.sil.hi{stroke:var(--orange);}
+  .truck .t-toldo path.lo:not(.nf){fill:#3a3732;}
+  .truck .t-toldo path.nf{stroke:#c9c6bd;}
   .truck-read{text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);margin-top:-14px;}
 
   /* ---------- bebidas em lista, topo compacto no cardápio e acabamentos ---------- */
