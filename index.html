@@ -4,12 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0d0d0d">
-<meta name="description" content="Narua, food truck de comida asiática de rua em São Paulo. Veja o cardápio com fotos e preços e onde o food truck está hoje.">
-<meta property="og:title" content="Narua · Comida asiática de rua">
-<meta property="og:description" content="Cardápio com fotos e preços e onde o food truck está hoje.">
+<meta name="description" content="Narua, food truck de comida asiática de rua na Grande São Paulo: yakissoba, karaage, guioza, takoyaki, tempura, corn dog coreano e poke. Toda quinta em Caieiras e todo sábado em Franco da Rocha. Veja o cardápio com fotos e preços e onde estamos hoje.">
+<link rel="canonical" href="https://naruafoodtruck.com.br/">
+<meta property="og:site_name" content="Narua">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Narua · Food truck de comida asiática de rua">
+<meta property="og:description" content="Cardápio com fotos e preços e onde o food truck está hoje. Toda quinta em Caieiras e todo sábado em Franco da Rocha.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://naruafoodtruck.com.br/">
+<meta property="og:image" content="https://naruafoodtruck.com.br/narua-logo.jpg">
+<meta property="og:image:width" content="640">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%9C%3C/text%3E%3C/svg%3E">
-<title>Narua · Comida asiática de rua</title>
+<link rel="apple-touch-icon" href="narua-logo.jpg">
+<title>Narua · Food truck de comida asiática de rua</title>
+<!-- dados para o Google entender o negócio (food truck sem endereço fixo) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FoodEstablishment",
+  "@id": "https://naruafoodtruck.com.br/#narua",
+  "name": "Narua",
+  "alternateName": "Narua Food Truck",
+  "description": "Food truck de comida asiática de rua na Grande São Paulo.",
+  "url": "https://naruafoodtruck.com.br/",
+  "image": "https://naruafoodtruck.com.br/narua-logo.jpg",
+  "logo": "https://naruafoodtruck.com.br/narua-logo.jpg",
+  "telephone": "+55 11 94328-3434",
+  "servesCuisine": ["Comida asiática", "Comida japonesa", "Comida coreana", "Comida de rua"],
+  "hasMenu": "https://naruafoodtruck.com.br/#cardapio",
+  "acceptsReservations": false,
+  "areaServed": [
+    { "@type": "City", "name": "Caieiras", "containedInPlace": { "@type": "State", "name": "São Paulo" } },
+    { "@type": "City", "name": "Franco da Rocha", "containedInPlace": { "@type": "State", "name": "São Paulo" } }
+  ],
+  "address": { "@type": "PostalAddress", "addressLocality": "Caieiras", "addressRegion": "SP", "addressCountry": "BR" },
+  "sameAs": ["https://instagram.com/narua.foodtruck"]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Titan+One&family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -130,6 +163,8 @@
   /* ---------- tela inicial (mesma cara do menu do app) ---------- */
   .tela{padding-top:18px;}
   .home{max-width:520px;margin:0 auto;padding-top:22px;}
+  .home .sobre{font-size:13.5px;line-height:1.5;color:#cfc7b4;text-align:center;margin:0 0 16px;}
+  .home .sobre strong{color:var(--paper);}
   .home-grid{display:flex;flex-direction:column;gap:14px;}
   .home-card{border:2px solid var(--ink);border-radius:var(--radius);padding:18px 20px;box-shadow:5px 5px 0 rgba(0,0,0,0.35);text-align:left;cursor:pointer;font-family:'Poppins',sans-serif;display:flex;align-items:center;gap:14px;width:100%;text-decoration:none;transition:transform .1s ease,box-shadow .1s ease;}
   .home-card:hover{transform:translate(1px,1px);box-shadow:3px 3px 0 rgba(0,0,0,0.35);}
@@ -365,6 +400,7 @@
         <div class="truck-stage" data-truck></div>
         <figcaption class="truck-read" data-truck-read>Bem-vindo ao Narua!</figcaption>
       </figure>
+      <p class="sobre">A <strong>Narua</strong> é um food truck de comida asiática de rua: yakissoba, karaage, guioza, takoyaki, tempura, corn dog coreano e poke. Toda quinta estamos em <strong>Caieiras</strong> e todo sábado em <strong>Franco da Rocha</strong>. Confira o cardápio e onde estamos hoje.</p>
       <div class="home-grid" id="homeGrid">
         <button class="home-card c-yellow" type="button" data-ir="cardapio">
           <span class="icon">🍜</span>
@@ -922,7 +958,7 @@ zoom.addEventListener('touchend', e => {
 // para mandar o link direto, ex.: naruafoodtruck.com.br/#onde-estamos
 // ---------------------------------------------------------------------------
 const TELAS = { '': 'telaInicio', 'cardapio': 'telaCardapio', 'onde-estamos': 'telaOnde' };
-const TITULOS = { '': 'Narua · Comida asiática de rua', 'cardapio': 'Narua · Cardápio', 'onde-estamos': 'Narua · Onde estamos' };
+const TITULOS = { '': 'Narua · Food truck de comida asiática de rua', 'cardapio': 'Narua · Cardápio', 'onde-estamos': 'Narua · Onde estamos' };
 
 function mostrarTela(){
   let nome = location.hash.replace(/^#/, '');
