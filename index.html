@@ -76,8 +76,7 @@
 
   /* ---------- topo ---------- */
   header{padding:34px 44px 8px;text-align:center;}
-  header .wordmark{font-family:'Titan One',cursive;font-size:56px;line-height:1.05;letter-spacing:.02em;color:var(--paper);-webkit-text-stroke:3px var(--ink);text-shadow:4px 4px 0 var(--orange2);}
-  header .wordmark .u{color:var(--orange);}
+  header .wordmark{display:block;margin:0 auto 4px;height:76px;width:auto;max-width:90%;object-fit:contain;}
   header .eyebrow{font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);margin-top:6px;}
   header h1{font-weight:700;font-size:18px;margin:6px 0 0;color:var(--paper);}
 
@@ -230,7 +229,7 @@
     .proximos li{flex-wrap:wrap;}
     .proximos a{margin-left:0;}
     header{padding:26px 30px 4px;}
-    header .wordmark{font-size:46px;}
+    header .wordmark{height:62px;}
     .side-wave{width:22px;}
     .grade{grid-template-columns:1fr;gap:18px;}
     .secao-titulo{font-size:23px;}
@@ -293,7 +292,7 @@
   .esg-tag{display:inline-block;margin-left:8px;vertical-align:middle;font-family:'Poppins',sans-serif;font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--red);border:2px solid var(--ink);border-radius:999px;padding:1px 7px;}
   /* ponto 4: topo compacto no cardápio */
   body[data-tela=cardapio] header{padding:14px 44px 0;}
-  body[data-tela=cardapio] header .wordmark{font-size:32px;-webkit-text-stroke:2px var(--ink);text-shadow:3px 3px 0 var(--orange2);}
+  body[data-tela=cardapio] header .wordmark{height:44px;}
   body[data-tela=cardapio] header .eyebrow, body[data-tela=cardapio] header h1{display:none;}
   #telaCardapio:has(#catNav:not([hidden])) .voltar-solto{display:none;}
   .cat-nav{margin-top:6px;}
@@ -333,7 +332,7 @@
 <body>
 
   <header>
-    <div class="wordmark">NAR<span class="u">U</span>A</div>
+    <img class="wordmark" src="narua-logo.svg?v=1" alt="Narua" width="466" height="148">
     <div class="eyebrow">FoodTruck · São Paulo</div>
     <h1>Comida asiática de rua</h1>
     <div class="aviso-exemplo" id="avisoExemplo" hidden>🚧 Cardápio de exemplo: fotos e preços reais em breve.</div>
