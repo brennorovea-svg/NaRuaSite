@@ -258,6 +258,9 @@
   /* ---------- food truck animado da tela inicial (figures/foodtruck.js) ---------- */
   .truck{margin:0 auto 10px;max-width:340px;
     --hairline-plate:var(--paper);--hairline-edge:var(--ink);--hairline-mid:var(--ink);--hairline-lo:rgba(24,24,24,.5);--hairline-hi:var(--orange);--hairline-stroke:1.7;}
+  /* o desenho tem uma faixa vazia em cima (espaço da fumaça): sem a faixa "Hoje estamos em", o truck sobe para perto da logo */
+  .faixa-hoje[hidden] + .truck{margin-top:-52px;}
+  @media (max-width:520px){ .faixa-hoje[hidden] + .truck{margin-top:-44px;} }
   /* cores do truck de verdade: cabine branca, baú preto pintado com arcos, rodas de aro amarelo */
   .truck .t-chao path:not(.nf){fill:#2b2723;stroke:#5c564a;}
   .truck .t-corpo path:not(.nf){fill:#161616;stroke:#8d8676;}
