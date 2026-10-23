@@ -44,10 +44,11 @@ function hatch(P, shape, a) {
 
 /**
  * Options for the food secreto (the site's easter egg): `secreto` drops the steam and the cook outside
- * and puts the two owners in the cab; `logo` paints that image on the hatch while it is closed, and
- * `chapeu` puts a party hat on the roof (the ODD event's truck).
+ * and puts the two owners in the cab; `logo` paints that image on the hatch while it is closed (the ODD
+ * event's truck); `chapeu` puts a party hat on the roof and `baloes` ties three balloons to it (the
+ * birthday truck).
  */
-function mount({ stage, svg, read, secreto = false, logo = "", chapeu = false }, value) {
+function mount({ stage, svg, read, secreto = false, logo = "", chapeu = false, baloes = false }, value) {
   const bag = disposer();
   let MAX = value;
 
@@ -104,9 +105,9 @@ function mount({ stage, svg, read, secreto = false, logo = "", chapeu = false },
     const [bx, by] = P(26, 21, ZB + 4), h = 62, w = 22;
     const cg = mk("g", { class: "chapeu" }, g);
     mk("path", { d: `M${bx - w} ${by} L${bx} ${by - h} L${bx + w} ${by} Q${bx} ${by + 6} ${bx - w} ${by} Z`, class: "cone" }, cg);
-    [0.28, 0.56].forEach((t) => {
-      const y = by - h * t, x = w * (1 - t);
-      mk("path", { d: `M${bx - x} ${y} Q${bx} ${y + 5 * (1 - t)} ${bx + x} ${y} L${bx + x * 0.8} ${y - 7} Q${bx} ${y - 7 + 4 * (1 - t)} ${bx - x * 0.8} ${y - 7} Z`, class: "faixa" }, cg);
+    // confetti dots on the cone
+    [[-0.45, 0.16, 0], [0.38, 0.22, 1], [-0.05, 0.38, 2], [0.3, 0.55, 0], [-0.22, 0.62, 1], [0.08, 0.8, 2]].forEach(([u, t, k]) => {
+      mk("circle", { cx: bx + u * w * (1 - t), cy: by - h * t, r: 3.1 - t * 1.2, class: "bolinha-chapeu c" + k }, cg);
     });
     mk("circle", { cx: bx, cy: by - h, r: 7, class: "pompom" }, cg);
   }
@@ -242,6 +243,18 @@ function mount({ stage, svg, read, secreto = false, logo = "", chapeu = false },
     const [sx, sy] = P(x, W + 5, WZ1 - 4);
     mk("path", { d: "M" + sx.toFixed(1) + " " + sy.toFixed(1) + " c -4 -5 4 -9 0 -14 s -4 -9 0 -14", class: "nf fumaca f" + k }, fg);
   });
+
+  // three balloons tied to the cab's roof, drawn last so they float over everything
+  if (baloes) {
+    const [ax, ay] = P(L - 3, W - 6, ZB), bg = mk("g", { class: "baloes" }, g);
+    [[-46, -112, 0], [-8, -140, 1], [30, -110, 2]].forEach(([dx, dy, k]) => {
+      const cx = ax + dx, cy = ay + dy, b = mk("g", { class: "balao b" + k }, bg);
+      mk("path", { d: `M${ax} ${ay} Q${ax + dx * 0.2} ${ay + dy * 0.45} ${cx} ${cy + 19}`, class: "fio" }, b);
+      mk("path", { d: `M${cx - 3} ${cy + 21} L${cx} ${cy + 16} L${cx + 3} ${cy + 21} Z`, class: "no" }, b);
+      mk("ellipse", { cx, cy, rx: 14, ry: 17, class: "bola" }, b);
+      mk("ellipse", { cx: cx - 5, cy: cy - 6, rx: 3, ry: 5, class: "brilho", transform: `rotate(-25 ${cx - 5} ${cy - 6})` }, b);
+    });
+  }
 
   const B = register(stage, () => { draw(); return false; });
   bag.add(B.unregister);

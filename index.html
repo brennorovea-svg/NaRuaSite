@@ -331,21 +331,41 @@
   .truck .braco,.truck .perna{fill:none;stroke-width:2.6;}
   .truck .perna{stroke:#2e2e2e;} .truck .sapato{stroke:#8f897c;} .truck .c0 .braco{stroke:#f2cfb1;} .truck .c1 .braco{stroke:#e9c29a;}
 
-  /* ---------- food secreto: o food truck espia no cardápio e dá um cupom (Apps Script v18) ---------- */
-  .ovo{position:fixed;left:-8px;bottom:-18px;z-index:60;width:230px;margin:0;pointer-events:none;max-width:none;
-    transition:transform .9s cubic-bezier(.3,1.4,.5,1);transform:translateX(-260px);}
-  .ovo.dentro{transform:translateX(-30px);}
-  .ovo-balao{position:absolute;bottom:100%;left:62px;width:224px;padding:12px 14px 11px;opacity:0;transform:translate(0,6px) scale(.6);transform-origin:left bottom;
-    font-family:'Poppins',sans-serif;color:var(--ink);background:var(--paper);border:2px solid var(--ink);border-radius:14px;box-shadow:3px 3px 0 var(--orange);
-    transition:opacity .25s ease,transform .25s ease;pointer-events:auto;}
-  .ovo-balao.on{opacity:1;transform:translate(0,-4px) scale(1);}
-  .ovo-balao::after{content:"";position:absolute;left:40px;top:100%;border:7px solid transparent;border-top-color:var(--ink);}
-  .ovo-balao b{display:block;font-family:'Titan One',cursive;font-weight:400;font-size:17px;line-height:1.15;padding-right:22px;}
-  .ovo-balao .premio{display:block;font-family:'Titan One',cursive;font-weight:400;font-size:21px;color:var(--red);margin:4px 0 6px;}
-  .ovo-balao .codigo{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;letter-spacing:.08em;color:var(--ink);border:2px dashed var(--ink);border-radius:8px;padding:2px 8px;background:#fff;}
-  .ovo-balao small{display:block;font-weight:600;font-size:11px;color:var(--ink-soft);margin-top:6px;line-height:1.3;}
+  /* ---------- food secreto: o food truck entra no meio da tela e dá um cupom (Apps Script v18) ---------- */
+  .ovo-fundo{position:fixed;inset:0;z-index:59;background:rgba(10,10,10,.62);opacity:0;transition:opacity .5s ease;}
+  .ovo-fundo.on{opacity:1;}
+  .ovo{position:fixed;left:50%;top:38%;z-index:60;width:min(320px,74vw);margin:0;max-width:none;pointer-events:none;
+    transform:translate(-50%,-50%) translateX(-100vw);transition:transform 1.8s cubic-bezier(.2,.75,.3,1);}
+  .ovo.dentro{transform:translate(-50%,-50%);}
+  .ovo.sai{transition:transform 1.4s cubic-bezier(.6,0,.9,.5);transform:translate(-50%,-50%) translateX(100vw);}
+  .ovo.anda .truck-stage{animation:ovo-pula .3s ease-in-out infinite alternate;}
+  @keyframes ovo-pula{to{transform:translateY(-3px) rotate(-.6deg);}}
+  .ovo svg{overflow:visible;}
+  .ovo-balao{position:absolute;top:92%;left:50%;width:min(270px,86vw);padding:14px 16px 12px;opacity:0;transform:translate(-50%,10px) scale(.7);transform-origin:50% 0;
+    text-align:center;font-family:'Poppins',sans-serif;color:var(--ink);background:var(--paper);border:2px solid var(--ink);border-radius:16px;box-shadow:4px 4px 0 var(--orange);
+    transition:opacity .25s ease,transform .3s cubic-bezier(.3,1.4,.5,1);pointer-events:auto;}
+  .ovo-balao.on{opacity:1;transform:translate(-50%,0) scale(1);}
+  .ovo-balao::after{content:"";position:absolute;left:50%;bottom:100%;margin-left:-8px;border:8px solid transparent;border-bottom-color:var(--ink);}
+  .ovo-balao b{display:block;font-family:'Titan One',cursive;font-weight:400;font-size:19px;line-height:1.15;padding:0 24px;}
+  .ovo-balao .premio{display:block;font-family:'Titan One',cursive;font-weight:400;font-size:24px;color:var(--red);margin:6px 0 8px;}
+  .ovo-balao .codigo{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;letter-spacing:.08em;color:var(--ink);border:2px dashed var(--ink);border-radius:8px;padding:3px 10px;background:#fff;}
+  .ovo-balao small{display:block;font-weight:600;font-size:11.5px;color:var(--ink-soft);margin-top:8px;line-height:1.3;}
   .ovo-balao.usado .codigo{text-decoration:line-through;opacity:.6;}
-  .ovo-x{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:2px solid var(--ink);background:var(--orange);color:var(--ink);font:800 13px/1 'Poppins',sans-serif;cursor:pointer;padding:0;}
+  .ovo-x{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;border:2px solid var(--ink);background:var(--orange);color:var(--ink);font:800 14px/1 'Poppins',sans-serif;cursor:pointer;padding:0;}
+  @media (min-width:900px){ .ovo{width:360px;top:36%;} }
+  /* aniversário: chapéu e balões */
+  .truck .chapeu .cone{fill:var(--chapeu,#c43ad6);stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;}
+  .truck .chapeu .pompom{fill:var(--orange);stroke:var(--ink);stroke-width:1.4;}
+  .truck .chapeu .bolinha-chapeu{stroke:none;} .truck .chapeu .c0{fill:var(--orange);} .truck .chapeu .c1{fill:#fff;} .truck .chapeu .c2{fill:var(--cyan);}
+  .truck .baloes .fio{fill:none;stroke:var(--paper);stroke-width:1.2;opacity:.85;}
+  .truck .baloes .bola{stroke:var(--ink);stroke-width:1.6;} .truck .baloes .brilho{fill:rgba(255,255,255,.55);stroke:none;}
+  .truck .baloes .no{stroke:var(--ink);stroke-width:1;}
+  .truck .b0 .bola,.truck .b0 .no{fill:var(--red);} .truck .b1 .bola,.truck .b1 .no{fill:var(--orange);} .truck .b2 .bola,.truck .b2 .no{fill:var(--cyan);}
+  .truck .balao{transform-box:fill-box;transform-origin:50% 100%;animation:ovo-balanca 2.4s ease-in-out infinite alternate;}
+  .truck .b1{animation-delay:-.8s;} .truck .b2{animation-delay:-1.6s;}
+  @keyframes ovo-balanca{from{transform:rotate(-4deg);}to{transform:rotate(4deg);}}
+  .ovo.aniversario .ovo-balao{box-shadow:4px 4px 0 var(--red);}
+  @media (prefers-reduced-motion:reduce){ .ovo,.ovo-balao,.ovo-fundo{transition:none;} .truck .balao,.ovo.anda .truck-stage{animation:none;} }
   /* as donas na cabine (Marcia no volante, Lynda ao lado) */
   .truck .t-cabine .dona path.roupa{fill:#141414;stroke:#8f897c;} .truck .t-cabine .dona path.gato{fill:var(--paper);stroke:none;}
   .truck .t-cabine .dona.marcia path.cabelo,.truck .dona.marcia .cabelo{fill:#2a1d16;} .truck .t-cabine .dona.lynda path.cabelo,.truck .dona.lynda .cabelo{fill:#120d0b;}
@@ -354,21 +374,18 @@
   .truck .dona .braco{stroke-width:2.6;} .truck .dona.lynda .braco{stroke:#e6bd94;}
   .truck .volante{stroke:#555 !important;stroke-width:1.6 !important;}
   .truck .t-cabine path.reflexo{fill:rgba(255,255,255,.08);stroke:none;}
-  /* tema ODD (só em evento especial): roxo do logo, logo no toldo, chapeuzinho de aniversário, rastro de spray */
+  /* tema ODD (só em evento especial): roxo do logo, logo no toldo, rastro de spray */
   .truck.odd{--odd:#b673f6;}
   .truck.odd .a0,.truck.odd .a2{fill:var(--odd);} .truck.odd .a1{fill:#fff;}
   .truck.odd .t-cabine path.e0{fill:var(--odd);} .truck.odd .t-cabine path.e1{fill:#fff;}
   .truck.odd .aro{fill:var(--odd);} .truck.odd .cubo{fill:#fff;} .truck.odd .bolinha{fill:var(--odd);}
-  .truck .chapeu .cone{fill:var(--odd,#b673f6);stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;}
-  .truck .chapeu .faixa{fill:#fff;stroke:none;} .truck .chapeu .pompom{fill:#fff;stroke:var(--ink);stroke-width:1.4;}
   .ovo.odd::before{content:"";position:absolute;right:78%;bottom:46px;width:min(420px,90vw);height:16px;border-radius:999px;opacity:0;transition:opacity .4s;
     background:linear-gradient(to left,rgba(182,115,246,.85),rgba(182,115,246,.35) 55%,transparent);filter:blur(3px);}
-  .ovo.odd.dentro::before{opacity:1;}
+  .ovo.odd.anda::before{opacity:1;}
   .ovo.odd .ovo-balao{background:#111;color:#fff;border-color:#fff;box-shadow:3px 3px 0 #b673f6;}
   .ovo.odd .ovo-balao::after{border-top-color:#fff;}
   .ovo.odd .ovo-balao b{color:#fff;} .ovo.odd .ovo-balao .premio{color:#b673f6;} .ovo.odd .ovo-balao small{color:#cfc8bb;}
   .ovo.odd .ovo-x{background:#b673f6;border-color:#fff;color:#111;}
-  @media (prefers-reduced-motion:reduce){ .ovo,.ovo-balao{transition:none;} }
 </style>
 </head>
 <body>
@@ -1296,7 +1313,7 @@ window.hairline = (figure) => {
 <script>
 // ----------------------------------------------------------------------------
 // Food secreto (easter egg com cupom): o food truck, com a Marcia e a Lynda na
-// cabine, espia do canto da tela do cardápio e dá um cupom com código único.
+// cabine, entra no meio da tela do cardápio e dá um cupom com código único.
 // As regras ficam na planilha (app → 🚚 Food secreto): ligado, a cada quantos
 // acessos, limite por dia, mensagem, prêmio e visual. O Apps Script (v18) gera
 // o código e controla o limite; aqui só contamos os acessos deste aparelho.
@@ -1304,7 +1321,7 @@ window.hairline = (figure) => {
 // ----------------------------------------------------------------------------
 (function(){
   const CHAVE = 'narua_acessos', CHAVE_APARELHO = 'narua_aparelho';
-  const TEMAS = { odd: { logo: 'odd-logo.png', chapeu: true } };
+  const TEMAS = { aniversario: { chapeu: true, baloes: true }, odd: { logo: 'odd-logo.png' } };
   const forca = /[?&]foodsecreto=1/.test(location.search);
   let n = 0, aparelho = '';
   try {
@@ -1316,7 +1333,7 @@ window.hairline = (figure) => {
   const depois = (ms, f) => fim.push(setTimeout(f, ms));
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  function limpa(){ fim.forEach(clearTimeout); fim = []; if (el) { el.remove(); el = null; ctl?.destroy?.(); ctl = null; } }
+  function limpa(){ fim.forEach(clearTimeout); fim = []; document.querySelector('.ovo-fundo')?.remove(); if (el) { el.remove(); el = null; ctl?.destroy?.(); ctl = null; } }
 
   function monta(tema){
     if (!window._truckFig || !window.HL) return null;
@@ -1329,7 +1346,7 @@ window.hairline = (figure) => {
     const stage = fig.querySelector('.truck-stage');
     const svg = HL.mk('svg', { viewBox: '0 0 400 320', 'aria-hidden': 'true' }, stage);
     // chega com o toldo fechado (no tema do evento, com o logo pintado nele)
-    ctl = window._truckFig.mount({ stage, svg, read: { textContent: '' }, secreto: true, logo: t.logo || '', chapeu: !!t.chapeu }, 0);
+    ctl = window._truckFig.mount({ stage, svg, read: { textContent: '' }, secreto: true, logo: t.logo || '', chapeu: !!t.chapeu, baloes: !!t.baloes }, 0);
     return fig;
   }
   function abreToldo(){
@@ -1339,9 +1356,15 @@ window.hairline = (figure) => {
   }
   function mostra(c){
     el = monta(c.tema); if (!el) return;
-    requestAnimationFrame(() => requestAnimationFrame(() => el && el.classList.add('dentro')));
-    depois(1000, () => {
+    // fundo escuro e o food atravessando até o meio da tela: não tem como não ver
+    const fundo = document.createElement('div');
+    fundo.className = 'ovo-fundo';
+    document.body.insertBefore(fundo, el);
+    el.classList.add('anda');
+    requestAnimationFrame(() => requestAnimationFrame(() => { fundo.classList.add('on'); el && el.classList.add('dentro'); }));
+    depois(1800, () => {
       if (!el) return;
+      el.classList.remove('anda');
       const b = el.querySelector('.ovo-balao');
       if (c.usado) b.classList.add('usado');
       b.innerHTML = '<button class="ovo-x" type="button" aria-label="Fechar">✕</button>' +
@@ -1349,8 +1372,9 @@ window.hairline = (figure) => {
         '<span class="codigo">' + esc(c.codigo) + '</span>' +
         '<small>' + (c.usado ? 'Este cupom já foi usado hoje.' : 'Mostre este código no balcão hoje. 1 por pessoa.') + '</small>';
       b.classList.add('on');
-      b.querySelector('.ovo-x').addEventListener('click', () => { b.classList.remove('on'); el.classList.remove('dentro'); depois(1000, limpa); });
-      if (!TEMAS[c.tema]) abreToldo();
+      const fecha = () => { b.classList.remove('on'); fundo.classList.remove('on'); el.classList.add('sai', 'anda'); depois(1500, limpa); };
+      b.querySelector('.ovo-x').addEventListener('click', fecha);
+      if (c.tema !== 'odd') abreToldo();
     });
   }
 
@@ -1374,6 +1398,6 @@ window.hairline = (figure) => {
 })();
 </script>
 <script src="figures/hairline-kernel.js"></script>
-<script type="module" src="figures/foodtruck.js?v=2"></script>
+<script type="module" src="figures/foodtruck.js?v=3"></script>
 </body>
 </html>
