@@ -42,7 +42,12 @@ function hatch(P, shape, a) {
   };
 }
 
-function mount({ stage, svg, read }, value) {
+/**
+ * Options for the food secreto (the site's easter egg): `secreto` drops the steam and the cook outside
+ * and puts the two owners in the cab; `logo` paints that image on the hatch while it is closed, and
+ * `chapeu` puts a party hat on the roof (the ODD event's truck).
+ */
+function mount({ stage, svg, read, secreto = false, logo = "", chapeu = false }, value) {
   const bag = disposer();
   let MAX = value;
 
@@ -50,6 +55,40 @@ function mount({ stage, svg, read }, value) {
   fit(C, [[-8, -8, -3], [L + CL + 8, W + 8, -3], [L + CL, -6, 0], [0, W + HD + 6, 0], [0, 0, ZB + 4], [WX1, W + HD, HZ]], 200, 166);
   const P = proj(C), front = facing(C);
   const g = mk("g", {}, svg);
+
+  /** The two owners in the cab, seen through the windscreen: Marcia at the wheel (the near side), Lynda beside her. */
+  function donas(cabG, vidro) {
+    const id = "pb" + Math.random().toString(36).slice(2, 8);
+    mk("path", { d: vidro }, mk("clipPath", { id }, mk("defs", {}, svg)));
+    const cg = mk("g", { "clip-path": "url(#" + id + ")" }, cabG);
+    const s = 1.05, x = L + CL - 10;
+    [[14, 0.6, "lynda"], [W - 15, 0, "marcia"]].forEach(([y, dz, quem]) => {
+      const z = 44.6 + dz - 28.4 * s;
+      const o = P(x, y, z), eu = P(x, y - s, z), ev = P(x, y, z - s);
+      const m = [eu[0] - o[0], eu[1] - o[1], ev[0] - o[0], ev[1] - o[1], o[0], o[1]].map((n) => n.toFixed(3)).join(" ");
+      const c = mk("g", { transform: "matrix(" + m + ")", class: "cozinheira dona " + quem }, cg);
+      const dd = (cls, path) => mk("path", { d: path, class: cls }, c);
+      // hair behind the head: Lynda's falls to her shoulders, Marcia's is tied in a bun on top
+      if (quem === "lynda") dd("cabelo", "M -4.4 -28.4 Q -4.8 -33 0 -33 Q 4.8 -33 4.4 -28.4 L 4.9 -22.4 L -4.9 -22.4 Z");
+      else mk("circle", { cy: -33.4, r: 2, class: "cabelo" }, c);
+      dd("roupa", "M -6 -12 L -6.3 -20.5 Q -6.3 -24.4 -2.5 -24.4 L 2.5 -24.4 Q 6.3 -24.4 6.3 -20.5 L 6 -12 Z");
+      mk("rect", { x: -1.2, y: -26, width: 2.4, height: 2, class: "pele" }, c);
+      mk("circle", { cy: -28.4, r: 3.5, class: "pele" }, c);
+      dd("cabelo franja", quem === "lynda"
+        ? "M -3.7 -28.2 Q -3.9 -31.8 0 -31.9 Q 3.9 -31.8 3.7 -28.2 Q 1.2 -30.2 -0.6 -29.6 Q -2 -29.2 -3.7 -28.2 Z"
+        : "M -3.6 -28.6 Q -3.8 -31.6 0 -31.7 Q 3.8 -31.6 3.6 -28.6 Q 1.5 -29.8 0 -28.9 Q -1.5 -29.8 -3.6 -28.6 Z");
+      mk("circle", { cx: -1.25, cy: -28.1, r: 0.45, class: "olho" }, c);
+      mk("circle", { cx: 1.25, cy: -28.1, r: 0.45, class: "olho" }, c);
+      dd("sorriso", "M -1.2 -26.8 Q 0 -25.9 1.2 -26.8");
+      dd("gato", "M -2 -19.2 L -2.1 -22.1 L -0.8 -20.8 Q 0 -21.0 0.8 -20.8 L 2.1 -22.1 L 2 -19.2 Q 1.9 -17.6 0 -17.6 Q -1.9 -17.6 -2 -19.2 Z");
+      mk("circle", { cx: -0.75, cy: -19.4, r: 0.32, class: "olho" }, c);
+      mk("circle", { cx: 0.75, cy: -19.4, r: 0.32, class: "olho" }, c);
+      // Marcia's hands on the wheel; Lynda waves
+      if (quem === "marcia") { dd("volante", "M -6 -15.6 Q 0 -18.2 6 -15.6"); }
+      else { dd("braco", "M -6 -22 Q -9 -25 -8.6 -30"); mk("circle", { cx: -8.6, cy: -30.6, r: 1.3, class: "pele mao" }, c); }
+    });
+    mk("path", { d: vidro, class: "reflexo" }, cabG);
+  }
 
   // the ground plate, the body, then the cabin, back to front
   const layer = (name) => mk("g", { class: "t-" + name }, g);
@@ -60,6 +99,17 @@ function mount({ stage, svg, read }, value) {
   // roof vent: a small solid on the body's top
   const [vr, vi] = rings(18, 12, 34, 30, 3, 1);
   put(solid(layer("teto")), prism(P, front, vr, vi, ZB, ZB + 4));
+  // a party hat standing on the roof vent: a cone in screen space, with stripes and a pompom
+  if (chapeu) {
+    const [bx, by] = P(26, 21, ZB + 4), h = 62, w = 22;
+    const cg = mk("g", { class: "chapeu" }, g);
+    mk("path", { d: `M${bx - w} ${by} L${bx} ${by - h} L${bx + w} ${by} Q${bx} ${by + 6} ${bx - w} ${by} Z`, class: "cone" }, cg);
+    [0.28, 0.56].forEach((t) => {
+      const y = by - h * t, x = w * (1 - t);
+      mk("path", { d: `M${bx - x} ${y} Q${bx} ${y + 5 * (1 - t)} ${bx + x} ${y} L${bx + x * 0.8} ${y - 7} Q${bx} ${y - 7 + 4 * (1 - t)} ${bx - x * 0.8} ${y - 7} Z`, class: "faixa" }, cg);
+    });
+    mk("circle", { cx: bx, cy: by - h, r: 7, class: "pompom" }, cg);
+  }
 
   // cabin: its foot runs the full length, its top stops short, so the front slopes
   const foot = rrect(L - 2, 1, L + CL, W - 1, 5, 4), top = rrect(L - 2, 3, L + CL - 7, W - 3, 4, 4);
@@ -68,7 +118,9 @@ function mount({ stage, svg, read }, value) {
   put(cab, { sil: poly(hull(ringAt(P, foot, Z0).concat(ringAt(P, top, ZC)))), crease: open(ringAt(P, run(inner, front), ZC)) });
   // windscreen on the slope, and the side window of the door
   const slope = (t, y) => P(lerp(L + CL - 0.6, L + CL - 7.6, t), y, lerp(Z0, ZC, t));
-  mk("path", { d: poly([slope(0.55, 6), slope(0.55, W - 6), slope(0.93, W - 6), slope(0.93, 6)]), class: "vidro" }, cabG);
+  const parabrisa = poly([slope(0.55, 6), slope(0.55, W - 6), slope(0.93, W - 6), slope(0.93, 6)]);
+  mk("path", { d: parabrisa, class: "vidro" }, cabG);
+  if (secreto) donas(cabG, parabrisa);
   mk("path", { d: poly(fillet([[L + 2, 36], [L + 15, 36], [L + 15, 50], [L + 2, 50]], [1.5, 1.5, 1.5, 1.5]).map(([x, z]) => P(x, W, z))), class: "vidro" }, cabG);
 
   // the door's emblem: a red disc with an orange one inside
@@ -157,6 +209,14 @@ function mount({ stage, svg, read }, value) {
   const face = mk("path", { class: "sil" }, hg);
   const listras = [0, 1, 2, 3, 4].map(() => mk("path", { class: "listra" }, hg));
   const lip = mk("path", { class: "nf lo" }, hg);
+  // the event's logo, painted on the hatch: seen only while it is shut over the window
+  let marca = null;
+  if (logo) {
+    const lw = 46, lh = lw * 353 / 1600, x0 = (WX0 + WX1) / 2 - lw / 2, z0 = HZ - (HD - lh) / 2 + 1, y = W + 0.7;
+    const o = P(x0, y, z0), eu = P(x0 + 1, y, z0), ev = P(x0, y, z0 - 1);
+    const m = [eu[0] - o[0], eu[1] - o[1], ev[0] - o[0], ev[1] - o[1], o[0], o[1]].map((n) => n.toFixed(3)).join(" ");
+    marca = mk("image", { href: logo, width: lw, height: lh, transform: "matrix(" + m + ")", class: "marca" }, hg);
+  }
 
   let drawn = NaN;
   function draw() {
@@ -167,17 +227,18 @@ function mount({ stage, svg, read }, value) {
     back.setAttribute("d", q.back); face.setAttribute("d", q.face);
     lip.setAttribute("d", q.lip); struts.setAttribute("d", q.struts);
     q.listras.forEach((d, k) => listras[k].setAttribute("d", d));
+    if (marca) marca.style.display = a < 4 ? "" : "none";
   }
   draw();
 
   face.classList.add("hi");
 
   // the cook outside stands by the cab, nearer the viewer than the hatch, so she is painted after it
-  cozinheira(76, 0, false);
+  if (!secreto) cozinheira(76, 0, false);
 
   // steam from the food, rising in front of the window (the page's CSS animates it, and fades it in while the pointer moves)
   const fg = layer("fumaca");
-  [[WX0 + 12, 0], [WX0 + 25, 1], [WX0 + 38, 2]].forEach(([x, k]) => {
+  if (!secreto) [[WX0 + 12, 0], [WX0 + 25, 1], [WX0 + 38, 2]].forEach(([x, k]) => {
     const [sx, sy] = P(x, W + 5, WZ1 - 4);
     mk("path", { d: "M" + sx.toFixed(1) + " " + sy.toFixed(1) + " c -4 -5 4 -9 0 -14 s -4 -9 0 -14", class: "nf fumaca f" + k }, fg);
   });

@@ -330,6 +330,45 @@
   .truck .sorriso,.truck .olho-linha{fill:none;stroke-width:.55;} .truck .tigela{fill:var(--orange2);}
   .truck .braco,.truck .perna{fill:none;stroke-width:2.6;}
   .truck .perna{stroke:#2e2e2e;} .truck .sapato{stroke:#8f897c;} .truck .c0 .braco{stroke:#f2cfb1;} .truck .c1 .braco{stroke:#e9c29a;}
+
+  /* ---------- food secreto: o food truck espia no cardápio e dá um cupom (Apps Script v18) ---------- */
+  .ovo{position:fixed;left:-8px;bottom:-18px;z-index:60;width:230px;margin:0;pointer-events:none;max-width:none;
+    transition:transform .9s cubic-bezier(.3,1.4,.5,1);transform:translateX(-260px);}
+  .ovo.dentro{transform:translateX(-30px);}
+  .ovo-balao{position:absolute;bottom:100%;left:62px;width:224px;padding:12px 14px 11px;opacity:0;transform:translate(0,6px) scale(.6);transform-origin:left bottom;
+    font-family:'Poppins',sans-serif;color:var(--ink);background:var(--paper);border:2px solid var(--ink);border-radius:14px;box-shadow:3px 3px 0 var(--orange);
+    transition:opacity .25s ease,transform .25s ease;pointer-events:auto;}
+  .ovo-balao.on{opacity:1;transform:translate(0,-4px) scale(1);}
+  .ovo-balao::after{content:"";position:absolute;left:40px;top:100%;border:7px solid transparent;border-top-color:var(--ink);}
+  .ovo-balao b{display:block;font-family:'Titan One',cursive;font-weight:400;font-size:17px;line-height:1.15;padding-right:22px;}
+  .ovo-balao .premio{display:block;font-family:'Titan One',cursive;font-weight:400;font-size:21px;color:var(--red);margin:4px 0 6px;}
+  .ovo-balao .codigo{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;letter-spacing:.08em;color:var(--ink);border:2px dashed var(--ink);border-radius:8px;padding:2px 8px;background:#fff;}
+  .ovo-balao small{display:block;font-weight:600;font-size:11px;color:var(--ink-soft);margin-top:6px;line-height:1.3;}
+  .ovo-balao.usado .codigo{text-decoration:line-through;opacity:.6;}
+  .ovo-x{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:2px solid var(--ink);background:var(--orange);color:var(--ink);font:800 13px/1 'Poppins',sans-serif;cursor:pointer;padding:0;}
+  /* as donas na cabine (Marcia no volante, Lynda ao lado) */
+  .truck .t-cabine .dona path.roupa{fill:#141414;stroke:#8f897c;} .truck .t-cabine .dona path.gato{fill:var(--paper);stroke:none;}
+  .truck .t-cabine .dona.marcia path.cabelo,.truck .dona.marcia .cabelo{fill:#2a1d16;} .truck .t-cabine .dona.lynda path.cabelo,.truck .dona.lynda .cabelo{fill:#120d0b;}
+  .truck .dona.marcia .pele{fill:#efc8a4;} .truck .dona.lynda .pele{fill:#e6bd94;}
+  .truck .t-cabine .dona path.sorriso,.truck .t-cabine .dona path.braco,.truck .t-cabine .dona path.volante{fill:none;}
+  .truck .dona .braco{stroke-width:2.6;} .truck .dona.lynda .braco{stroke:#e6bd94;}
+  .truck .volante{stroke:#555 !important;stroke-width:1.6 !important;}
+  .truck .t-cabine path.reflexo{fill:rgba(255,255,255,.08);stroke:none;}
+  /* tema ODD (só em evento especial): roxo do logo, logo no toldo, chapeuzinho de aniversário, rastro de spray */
+  .truck.odd{--odd:#b673f6;}
+  .truck.odd .a0,.truck.odd .a2{fill:var(--odd);} .truck.odd .a1{fill:#fff;}
+  .truck.odd .t-cabine path.e0{fill:var(--odd);} .truck.odd .t-cabine path.e1{fill:#fff;}
+  .truck.odd .aro{fill:var(--odd);} .truck.odd .cubo{fill:#fff;} .truck.odd .bolinha{fill:var(--odd);}
+  .truck .chapeu .cone{fill:var(--odd,#b673f6);stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;}
+  .truck .chapeu .faixa{fill:#fff;stroke:none;} .truck .chapeu .pompom{fill:#fff;stroke:var(--ink);stroke-width:1.4;}
+  .ovo.odd::before{content:"";position:absolute;right:78%;bottom:46px;width:min(420px,90vw);height:16px;border-radius:999px;opacity:0;transition:opacity .4s;
+    background:linear-gradient(to left,rgba(182,115,246,.85),rgba(182,115,246,.35) 55%,transparent);filter:blur(3px);}
+  .ovo.odd.dentro::before{opacity:1;}
+  .ovo.odd .ovo-balao{background:#111;color:#fff;border-color:#fff;box-shadow:3px 3px 0 #b673f6;}
+  .ovo.odd .ovo-balao::after{border-top-color:#fff;}
+  .ovo.odd .ovo-balao b{color:#fff;} .ovo.odd .ovo-balao .premio{color:#b673f6;} .ovo.odd .ovo-balao small{color:#cfc8bb;}
+  .ovo.odd .ovo-x{background:#b673f6;border-color:#fff;color:#111;}
+  @media (prefers-reduced-motion:reduce){ .ovo,.ovo-balao{transition:none;} }
 </style>
 </head>
 <body>
@@ -1250,10 +1289,91 @@ window.hairline = (figure) => {
   // a legenda fica sempre nas boas-vindas; a figura só mexe o toldo
   const read = { set textContent(v) { label.textContent = nomes.rest; }, get textContent() { return label.textContent; } };
   figure.mount({ stage, svg, read }, figure.range[1]);
+  window._truckFig = figure; window._ovoConfere?.();
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) HL.tour(stage, figure.tour || HL.LAP, () => {});
 };
 </script>
+<script>
+// ----------------------------------------------------------------------------
+// Food secreto (easter egg com cupom): o food truck, com a Marcia e a Lynda na
+// cabine, espia do canto da tela do cardápio e dá um cupom com código único.
+// As regras ficam na planilha (app → 🚚 Food secreto): ligado, a cada quantos
+// acessos, limite por dia, mensagem, prêmio e visual. O Apps Script (v18) gera
+// o código e controla o limite; aqui só contamos os acessos deste aparelho.
+// Teste: ?foodsecreto=1 pede o cupom em todo acesso (vale o limite do dia).
+// ----------------------------------------------------------------------------
+(function(){
+  const CHAVE = 'narua_acessos', CHAVE_APARELHO = 'narua_aparelho';
+  const TEMAS = { odd: { logo: 'odd-logo.png', chapeu: true } };
+  const forca = /[?&]foodsecreto=1/.test(location.search);
+  let n = 0, aparelho = '';
+  try {
+    n = (parseInt(localStorage.getItem(CHAVE), 10) || 0) + 1; localStorage.setItem(CHAVE, n);
+    aparelho = localStorage.getItem(CHAVE_APARELHO) || '';
+    if (!aparelho) { aparelho = Date.now().toString(36) + Math.random().toString(36).slice(2, 8); localStorage.setItem(CHAVE_APARELHO, aparelho); }
+  } catch (e) {}
+  let conferido = false, el = null, ctl = null, fim = [];
+  const depois = (ms, f) => fim.push(setTimeout(f, ms));
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function limpa(){ fim.forEach(clearTimeout); fim = []; if (el) { el.remove(); el = null; ctl?.destroy?.(); ctl = null; } }
+
+  function monta(tema){
+    if (!window._truckFig || !window.HL) return null;
+    const t = TEMAS[tema] || {};
+    const fig = document.createElement('figure');
+    fig.className = 'truck ovo' + (TEMAS[tema] ? ' ' + tema : '');
+    fig.setAttribute('aria-hidden', 'false');
+    fig.innerHTML = '<div class="ovo-balao" role="status"></div><div class="truck-stage" aria-hidden="true"></div>';
+    document.body.appendChild(fig);
+    const stage = fig.querySelector('.truck-stage');
+    const svg = HL.mk('svg', { viewBox: '0 0 400 320', 'aria-hidden': 'true' }, stage);
+    // chega com o toldo fechado (no tema do evento, com o logo pintado nele)
+    ctl = window._truckFig.mount({ stage, svg, read: { textContent: '' }, secreto: true, logo: t.logo || '', chapeu: !!t.chapeu }, 0);
+    return fig;
+  }
+  function abreToldo(){
+    const t0 = performance.now(), ate = window._truckFig.range[1];
+    const passo = (t) => { if (!ctl) return; const k = Math.min(1, (t - t0) / 700); ctl.set(ate * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(passo); };
+    requestAnimationFrame(passo);
+  }
+  function mostra(c){
+    el = monta(c.tema); if (!el) return;
+    requestAnimationFrame(() => requestAnimationFrame(() => el && el.classList.add('dentro')));
+    depois(1000, () => {
+      if (!el) return;
+      const b = el.querySelector('.ovo-balao');
+      if (c.usado) b.classList.add('usado');
+      b.innerHTML = '<button class="ovo-x" type="button" aria-label="Fechar">✕</button>' +
+        '<b>' + esc(c.mensagem) + '</b><span class="premio">' + esc(c.premio) + '</span>' +
+        '<span class="codigo">' + esc(c.codigo) + '</span>' +
+        '<small>' + (c.usado ? 'Este cupom já foi usado hoje.' : 'Mostre este código no balcão hoje. 1 por pessoa.') + '</small>';
+      b.classList.add('on');
+      b.querySelector('.ovo-x').addEventListener('click', () => { b.classList.remove('on'); el.classList.remove('dentro'); depois(1000, limpa); });
+      if (!TEMAS[c.tema]) abreToldo();
+    });
+  }
+
+  async function confere(){
+    if (document.body.dataset.tela !== 'cardapio') { limpa(); return; }
+    if (conferido || !window._truckFig || !URL_CARDAPIO || !aparelho) return;
+    conferido = true;
+    try {
+      const cfg = await (await fetch(URL_CARDAPIO + '?action=foodSecreto')).json();
+      if (!cfg || !cfg.ativo) return;
+      if (!forca && !cfg.soltar && n % (cfg.cada || 5) !== 0) return;
+      const c = await (await fetch(URL_CARDAPIO + '?action=foodSecretoCupom&aparelho=' + encodeURIComponent(aparelho))).json();
+      if (!c || !c.ok || !c.codigo) return;
+      depois(1200, () => { if (document.body.dataset.tela === 'cardapio') mostra(c); else conferido = false; });
+    } catch (e) {}
+  }
+  window.addEventListener('hashchange', () => setTimeout(confere, 0));
+  window.addEventListener('popstate', () => setTimeout(confere, 0));
+  document.addEventListener('click', e => { if (e.target.closest('[data-ir]')) setTimeout(confere, 0); });
+  window._ovoConfere = confere;
+})();
+</script>
 <script src="figures/hairline-kernel.js"></script>
-<script type="module" src="figures/foodtruck.js"></script>
+<script type="module" src="figures/foodtruck.js?v=2"></script>
 </body>
 </html>
