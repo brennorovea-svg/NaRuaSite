@@ -350,6 +350,7 @@
   .ovo-balao .premio{display:block;font-family:'Titan One',cursive;font-weight:400;font-size:24px;color:var(--red);margin:6px 0 8px;}
   .ovo-balao .codigo{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;letter-spacing:.08em;color:var(--ink);border:2px dashed var(--ink);border-radius:8px;padding:3px 10px;background:#fff;}
   .ovo-balao small{display:block;font-weight:600;font-size:11.5px;color:var(--ink-soft);margin-top:8px;line-height:1.3;}
+  .ovo-balao .num{display:inline-block;margin-left:6px;vertical-align:middle;font:700 12px/1 'Poppins',sans-serif;color:var(--orange);background:var(--ink);border-radius:999px;padding:4px 9px;}
   .ovo-balao.usado .codigo{text-decoration:line-through;opacity:.6;}
   .ovo-x{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;border:2px solid var(--ink);background:var(--orange);color:var(--ink);font:800 14px/1 'Poppins',sans-serif;cursor:pointer;padding:0;}
   @media (min-width:900px){ .ovo{width:360px;top:36%;} }
@@ -1356,7 +1357,7 @@ window.hairline = (figure) => {
   chip.addEventListener('click', () => { if (guardado && !el) mostra(guardado); });
   document.body.appendChild(chip);
   function guarda(c){
-    guardado = { hoje: c.hoje || hoje, codigo: c.codigo, mensagem: c.mensagem, premio: c.premio, tema: c.tema, usado: !!c.usado };
+    guardado = { hoje: c.hoje || hoje, codigo: c.codigo, numero: c.numero || 0, mensagem: c.mensagem, premio: c.premio, tema: c.tema, usado: !!c.usado };
     try { localStorage.setItem(CHAVE_CUPOM, JSON.stringify(guardado)); } catch (e) {}
   }
 
@@ -1397,7 +1398,7 @@ window.hairline = (figure) => {
       if (c.usado) b.classList.add('usado');
       b.innerHTML = '<button class="ovo-x" type="button" aria-label="Fechar">✕</button>' +
         '<b>' + esc(c.mensagem) + '</b><span class="premio">' + esc(c.premio) + '</span>' +
-        '<span class="codigo">' + esc(c.codigo) + '</span>' +
+        '<span class="codigo">' + esc(c.codigo) + '</span>' + (c.numero ? '<span class="num">nº ' + esc(c.numero) + '</span>' : '') +
         '<small>' + (c.teste ? 'Cupom de teste da equipe. Não vale no balcão.' : c.usado ? 'Este cupom já foi usado hoje.' : 'Mostre este código no balcão hoje. 1 por pessoa.') + '</small>';
       b.classList.add('on');
       const fecha = () => { b.classList.remove('on'); fundo.classList.remove('on'); el.classList.add('sai', 'anda'); depois(1500, limpa); };
