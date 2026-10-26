@@ -353,6 +353,9 @@
   .ovo-balao.usado .codigo{text-decoration:line-through;opacity:.6;}
   .ovo-x{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;border:2px solid var(--ink);background:var(--orange);color:var(--ink);font:800 14px/1 'Poppins',sans-serif;cursor:pointer;padding:0;}
   @media (min-width:900px){ .ovo{width:360px;top:36%;} }
+  /* v21: quem já ganhou hoje vê só este botão (o food não volta a aparecer sozinho) */
+  .ovo-chip{position:fixed;left:14px;bottom:14px;z-index:30;display:none;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;border:2px solid var(--ink);background:var(--orange);color:var(--ink);font:700 14px/1 'Poppins',sans-serif;box-shadow:3px 3px 0 var(--ink);cursor:pointer;}
+  body[data-tela="cardapio"] .ovo-chip.on{display:inline-flex;}
   /* aniversário: chapéu e balões */
   .truck .chapeu .cone{fill:var(--chapeu,#c43ad6);stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;}
   .truck .chapeu .pompom{fill:var(--orange);stroke:var(--ink);stroke-width:1.4;}
@@ -1315,25 +1318,49 @@ window.hairline = (figure) => {
 // Food secreto (easter egg com cupom): o food truck, com a Marcia e a Lynda na
 // cabine, entra no meio da tela do cardápio e dá um cupom com código único.
 // As regras ficam na planilha (app → 🚚 Food secreto): ligado, a cada quantos
-// acessos, limite por dia, mensagem, prêmio e visual. O Apps Script (v18) gera
-// o código e controla o limite; aqui só contamos os acessos deste aparelho.
-// Teste: ?foodsecreto=1 pede o cupom em todo acesso (vale o limite do dia).
+// acessos, limite por dia, mensagem, prêmio e visual.
+// v21 (Apps Script v21): QUEM DECIDE É O SERVIDOR. Cada visita ao cardápio é
+// contada lá (todos os visitantes juntos; o mesmo aparelho conta 1 vez a cada
+// 30 min), então atualizar a página não força o food. O food aparece 1 vez por
+// aparelho por dia; depois fica só o botão "🎟️ Seu cupom".
+// Teste da equipe: link gerado no app (🚚 Food secreto → Testar no meu
+// celular), ?foodsecreto=<chave>, vale 30 min e o código TESTE-XXXX não vale.
 // ----------------------------------------------------------------------------
 (function(){
-  const CHAVE = 'narua_acessos', CHAVE_APARELHO = 'narua_aparelho';
+  const CHAVE_APARELHO = 'narua_aparelho', CHAVE_CUPOM = 'narua_cupom';
   const TEMAS = { aniversario: { chapeu: true, baloes: true }, odd: { logo: 'odd-logo.png' } };
-  const forca = /[?&]foodsecreto=1/.test(location.search);
-  let n = 0, aparelho = '';
+  const teste = (location.search.match(/[?&]foodsecreto=([A-Za-z0-9]{16,40})/) || [])[1] || '';
+  const hoje = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+  let aparelho = '', guardado = null;
   try {
-    n = (parseInt(localStorage.getItem(CHAVE), 10) || 0) + 1; localStorage.setItem(CHAVE, n);
+    localStorage.removeItem('narua_acessos'); // contador antigo (v18), não é mais usado
     aparelho = localStorage.getItem(CHAVE_APARELHO) || '';
     if (!aparelho) { aparelho = Date.now().toString(36) + Math.random().toString(36).slice(2, 8); localStorage.setItem(CHAVE_APARELHO, aparelho); }
+    guardado = JSON.parse(localStorage.getItem(CHAVE_CUPOM) || 'null');
+    if (!guardado || guardado.hoje !== hoje) guardado = null;
   } catch (e) {}
+  // "marca" do aparelho: igual na aba anônima e com os dados limpos no mesmo
+  // celular. Não identifica a pessoa; só evita 2 cupons seguidos do mesmo aparelho.
+  const marca = (() => {
+    const t = [navigator.userAgent, screen.width + 'x' + screen.height, window.devicePixelRatio, navigator.language,
+      (Intl.DateTimeFormat().resolvedOptions().timeZone || ''), navigator.hardwareConcurrency || '', navigator.maxTouchPoints || ''].join('|');
+    let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) >>> 0;
+    return h.toString(36);
+  })();
   let conferido = false, el = null, ctl = null, fim = [];
   const depois = (ms, f) => fim.push(setTimeout(f, ms));
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  function limpa(){ fim.forEach(clearTimeout); fim = []; document.querySelector('.ovo-fundo')?.remove(); if (el) { el.remove(); el = null; ctl?.destroy?.(); ctl = null; } }
+  const chip = document.createElement('button');
+  chip.type = 'button'; chip.className = 'ovo-chip'; chip.textContent = '🎟️ Seu cupom';
+  chip.addEventListener('click', () => { if (guardado && !el) mostra(guardado); });
+  document.body.appendChild(chip);
+  function guarda(c){
+    guardado = { hoje: c.hoje || hoje, codigo: c.codigo, mensagem: c.mensagem, premio: c.premio, tema: c.tema, usado: !!c.usado };
+    try { localStorage.setItem(CHAVE_CUPOM, JSON.stringify(guardado)); } catch (e) {}
+  }
+
+  function limpa(){ fim.forEach(clearTimeout); fim = []; document.querySelector('.ovo-fundo')?.remove(); if (el) { el.remove(); el = null; ctl?.destroy?.(); ctl = null; } chip.classList.toggle('on', !!guardado); }
 
   function monta(tema){
     if (!window._truckFig || !window.HL) return null;
@@ -1356,6 +1383,7 @@ window.hairline = (figure) => {
   }
   function mostra(c){
     el = monta(c.tema); if (!el) return;
+    chip.classList.remove('on');
     // fundo escuro e o food atravessando até o meio da tela: não tem como não ver
     const fundo = document.createElement('div');
     fundo.className = 'ovo-fundo';
@@ -1370,7 +1398,7 @@ window.hairline = (figure) => {
       b.innerHTML = '<button class="ovo-x" type="button" aria-label="Fechar">✕</button>' +
         '<b>' + esc(c.mensagem) + '</b><span class="premio">' + esc(c.premio) + '</span>' +
         '<span class="codigo">' + esc(c.codigo) + '</span>' +
-        '<small>' + (c.usado ? 'Este cupom já foi usado hoje.' : 'Mostre este código no balcão hoje. 1 por pessoa.') + '</small>';
+        '<small>' + (c.teste ? 'Cupom de teste da equipe. Não vale no balcão.' : c.usado ? 'Este cupom já foi usado hoje.' : 'Mostre este código no balcão hoje. 1 por pessoa.') + '</small>';
       b.classList.add('on');
       const fecha = () => { b.classList.remove('on'); fundo.classList.remove('on'); el.classList.add('sai', 'anda'); depois(1500, limpa); };
       b.querySelector('.ovo-x').addEventListener('click', fecha);
@@ -1380,14 +1408,21 @@ window.hairline = (figure) => {
 
   async function confere(){
     if (document.body.dataset.tela !== 'cardapio') { limpa(); return; }
+    if (!el) chip.classList.toggle('on', !!guardado);
     if (conferido || !window._truckFig || !URL_CARDAPIO || !aparelho) return;
     conferido = true;
+    // já ganhou hoje neste aparelho: o food não aparece de novo, fica o botão
+    if (guardado && !teste) return;
     try {
-      const cfg = await (await fetch(URL_CARDAPIO + '?action=foodSecreto')).json();
-      if (!cfg || !cfg.ativo) return;
-      if (!forca && !cfg.soltar && n % (cfg.cada || 5) !== 0) return;
-      const c = await (await fetch(URL_CARDAPIO + '?action=foodSecretoCupom&aparelho=' + encodeURIComponent(aparelho))).json();
+      if (!teste) {
+        const cfg = await (await fetch(URL_CARDAPIO + '?action=foodSecreto')).json();
+        if (!cfg || !cfg.ativo) return;
+      }
+      const c = await (await fetch(URL_CARDAPIO + '?action=foodSecretoVisita&aparelho=' + encodeURIComponent(aparelho) +
+        '&marca=' + encodeURIComponent(marca) + (teste ? '&teste=' + encodeURIComponent(teste) : ''))).json();
       if (!c || !c.ok || !c.codigo) return;
+      if (!c.teste) guarda(c);
+      if (!c.mostra) { if (!el && document.body.dataset.tela === 'cardapio') chip.classList.add('on'); return; }
       depois(1200, () => { if (document.body.dataset.tela === 'cardapio') mostra(c); else conferido = false; });
     } catch (e) {}
   }
