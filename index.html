@@ -1478,6 +1478,8 @@ window.hairline = (figure) => {
 // aparelho por dia; depois fica só o botão "🎟️ Seu cupom".
 // Teste da equipe: link gerado no app (🚚 Food secreto → Testar no meu
 // celular), ?foodsecreto=<chave>, vale 30 min e o código TESTE-XXXX não vale.
+// Apps Script v24: o cupom vale 15 min ("até HH:MM"); não usado, expira e
+// volta pro fim da fila (o food aparece para outra pessoa).
 // ----------------------------------------------------------------------------
 (function(){
   const CHAVE_APARELHO = 'narua_aparelho', CHAVE_CUPOM = 'narua_cupom';
@@ -1509,7 +1511,7 @@ window.hairline = (figure) => {
   chip.addEventListener('click', () => { if (guardado && !el) mostra(guardado); });
   document.body.appendChild(chip);
   function guarda(c){
-    guardado = { hoje: c.hoje || hoje, codigo: c.codigo, numero: c.numero || 0, mensagem: c.mensagem, premio: c.premio, tema: c.tema, usado: !!c.usado };
+    guardado = { hoje: c.hoje || hoje, codigo: c.codigo, numero: c.numero || 0, mensagem: c.mensagem, premio: c.premio, tema: c.tema, usado: !!c.usado, expirado: !!c.expirado, ate: c.ate || '' };
     try { localStorage.setItem(CHAVE_CUPOM, JSON.stringify(guardado)); } catch (e) {}
   }
 
@@ -1547,11 +1549,14 @@ window.hairline = (figure) => {
       if (!el) return;
       el.classList.remove('anda');
       const b = el.querySelector('.ovo-balao');
-      if (c.usado) b.classList.add('usado');
+      // v24: passou do "até HH:MM" sem usar = expirou (confere aqui, sem perguntar ao servidor)
+      const agora = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
+      const expirou = !c.teste && !c.usado && (c.expirado || (c.ate && agora >= c.ate));
+      if (c.usado || expirou) b.classList.add('usado');
       b.innerHTML = '<button class="ovo-x" type="button" aria-label="Fechar">✕</button>' +
         '<b>' + esc(c.mensagem) + '</b><span class="premio">' + esc(c.premio) + '</span>' +
         '<span class="codigo">' + esc(c.codigo) + '</span>' + (c.numero ? '<span class="num">nº ' + esc(c.numero) + '</span>' : '') +
-        '<small>' + (c.teste ? 'Cupom de teste da equipe. Não vale no balcão.' : c.usado ? 'Este cupom já foi usado hoje.' : 'Mostre este código no balcão hoje. 1 por pessoa.') + '</small>';
+        '<small>' + (c.teste ? 'Cupom de teste da equipe. Não vale no balcão.' : c.usado ? 'Este cupom já foi usado hoje.' : expirou ? 'Este cupom expirou. Fique de olho: o food pode aparecer de novo para outra pessoa.' : c.ate ? 'Mostre este código no balcão até ' + esc(c.ate) + '. 1 por pessoa.' : 'Mostre este código no balcão hoje. 1 por pessoa.') + '</small>';
       b.classList.add('on');
       const fecha = () => { b.classList.remove('on'); fundo.classList.remove('on'); el.classList.add('sai', 'anda'); depois(1500, limpa); };
       b.querySelector('.ovo-x').addEventListener('click', fecha);
