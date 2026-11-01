@@ -1480,6 +1480,8 @@ window.hairline = (figure) => {
 // celular), ?foodsecreto=<chave>, vale 30 min e o código TESTE-XXXX não vale.
 // Apps Script v24: o cupom vale 15 min ("até HH:MM"); não usado, expira e
 // volta pro fim da fila (o food aparece para outra pessoa).
+// Apps Script v25 (01/11): aba anônima não força mais o food (a marca do
+// aparelho conta 1 acesso a cada 30 min e não ganha 2 vezes no dia).
 // ----------------------------------------------------------------------------
 (function(){
   const CHAVE_APARELHO = 'narua_aparelho', CHAVE_CUPOM = 'narua_cupom';
@@ -1495,12 +1497,27 @@ window.hairline = (figure) => {
     if (!guardado || guardado.hoje !== hoje) guardado = null;
   } catch (e) {}
   // "marca" do aparelho: igual na aba anônima e com os dados limpos no mesmo
-  // celular. Não identifica a pessoa; só evita 2 cupons seguidos do mesmo aparelho.
-  const marca = (() => {
-    const t = [navigator.userAgent, screen.width + 'x' + screen.height, window.devicePixelRatio, navigator.language,
-      (Intl.DateTimeFormat().resolvedOptions().timeZone || ''), navigator.hardwareConcurrency || '', navigator.maxTouchPoints || ''].join('|');
-    let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) >>> 0;
-    return h.toString(36);
+  // celular. Não identifica a pessoa; o servidor (Apps Script v25) conta 1 acesso
+  // por marca a cada 30 min e a marca que ganhou não ganha de novo no dia.
+  // Site v25: mais detalhes do aparelho (modelo do Android, placa de vídeo,
+  // idiomas) para dois celulares parecidos não terem a mesma marca.
+  const marcaPronta = (async () => {
+    let gpu = '', modelo = '';
+    try {
+      const gl = document.createElement('canvas').getContext('webgl');
+      const ext = gl && gl.getExtension('WEBGL_debug_renderer_info');
+      gpu = gl ? String(gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER) || '') : '';
+    } catch (e) {}
+    try {
+      if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+        const v = await Promise.race([navigator.userAgentData.getHighEntropyValues(['model', 'platformVersion']), new Promise(r => setTimeout(() => r({}), 800))]);
+        modelo = (v.model || '') + '/' + (v.platformVersion || '');
+      }
+    } catch (e) {}
+    const t = [navigator.userAgent, screen.width + 'x' + screen.height, screen.colorDepth, window.devicePixelRatio, (navigator.languages || []).join(',') || navigator.language,
+      (Intl.DateTimeFormat().resolvedOptions().timeZone || ''), navigator.hardwareConcurrency || '', navigator.maxTouchPoints || '', navigator.platform || '', gpu, modelo].join('|');
+    let h = 5381, g = 52711; for (let i = 0; i < t.length; i++) { h = ((h << 5) + h + t.charCodeAt(i)) >>> 0; g = (Math.imul(g ^ t.charCodeAt(i), 16777619)) >>> 0; }
+    return h.toString(36) + g.toString(36);
   })();
   let conferido = false, el = null, ctl = null, fim = [];
   const depois = (ms, f) => fim.push(setTimeout(f, ms));
@@ -1576,6 +1593,7 @@ window.hairline = (figure) => {
         const cfg = await (await fetch(URL_CARDAPIO + '?action=foodSecreto')).json();
         if (!cfg || !cfg.ativo) return;
       }
+      const marca = await marcaPronta;
       const c = await (await fetch(URL_CARDAPIO + '?action=foodSecretoVisita&aparelho=' + encodeURIComponent(aparelho) +
         '&marca=' + encodeURIComponent(marca) + (teste ? '&teste=' + encodeURIComponent(teste) : ''))).json();
       if (!c || !c.ok || !c.codigo) return;
