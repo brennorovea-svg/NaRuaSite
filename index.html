@@ -531,6 +531,24 @@
   .ovo.odd .ovo-balao::after{border-top-color:#fff;}
   .ovo.odd .ovo-balao b{color:#fff;} .ovo.odd .ovo-balao .premio{color:#b673f6;} .ovo.odd .ovo-balao small{color:#cfc8bb;}
   .ovo.odd .ovo-x{background:#b673f6;border-color:#fff;color:#111;}
+  /* ---------- movimento (receitas Neon Motion 15, 14, 07 e 20, nas cores do Narua) ---------- */
+  /* 15 marca-texto: laranja passa por trás de "rua" */
+  .mk{position:relative;isolation:isolate;padding:0 5px;transition:color 200ms 250ms;}
+  .mk::before{content:"";position:absolute;inset:6% -1px 0 -1px;background:var(--orange);border-radius:5px;z-index:-1;transform:scaleX(0);transform-origin:left;transition:transform 500ms cubic-bezier(.65,0,.35,1);}
+  .mk.on{color:var(--ink);}
+  .mk.on::before{transform:scaleX(1);}
+  /* 14 sublinhado que desenha: Caieiras e Franco da Rocha */
+  .ul{position:relative;white-space:nowrap;}
+  .ul::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;border-radius:2px;background:var(--orange);transform:scaleX(0);transform-origin:left;transition:transform 300ms cubic-bezier(.22,1,.36,1);}
+  .ul.on::after{transform:scaleX(1);}
+  /* 20 indicador elástico das categorias: a pílula laranja corre por baixo dos chips */
+  .cat-nav .lista{position:relative;}
+  .cat-nav .lista .chip{position:relative;z-index:1;}
+  .cat-ind{position:absolute;z-index:0;left:0;top:0;width:0;height:0;border:2px solid var(--ink);border-radius:999px;background:var(--orange);box-shadow:2px 2px 0 var(--paper);pointer-events:none;}
+  /* com o indicador, os chips viram texto sobre o fundo escuro e só a pílula laranja marca a categoria */
+  .cat-nav .lista.com-ind .chip{background:transparent;color:var(--paper);border-color:#3a352b;box-shadow:none;transition:color 160ms 140ms;}
+  .cat-nav .lista.com-ind .chip.ativo{color:var(--ink);border-color:transparent;}
+  @media (prefers-reduced-motion:reduce){ .mk,.mk::before,.ul::after,.cat-nav .lista.com-ind .chip{transition:none;} }
 </style>
 </head>
 <body>
@@ -538,7 +556,7 @@
   <header>
     <img class="wordmark" src="narua-logo.svg?v=1" alt="Narua" width="466" height="148">
     <div class="eyebrow">FoodTruck · São Paulo</div>
-    <h1>Comida asiática de rua</h1>
+    <h1>Comida asiática de <span class="mk" id="mkRua">rua</span></h1>
     <div class="aviso-exemplo" id="avisoExemplo" hidden>🚧 Cardápio de exemplo: fotos e preços reais em breve.</div>
   </header>
 
@@ -603,7 +621,7 @@
         <div class="truck-stage" data-truck></div>
         <figcaption class="truck-read" data-truck-read>Bem-vindo ao Narua!</figcaption>
       </figure>
-      <p class="sobre"><strong>Narua</strong>: food truck de comida asiática de rua. Quinta em <strong>Caieiras</strong>, sábado em <strong>Franco da Rocha</strong>.</p>
+      <p class="sobre"><strong>Narua</strong>: food truck de comida asiática de rua. Quinta em <strong class="ul">Caieiras</strong>, sábado em <strong class="ul">Franco da Rocha</strong>.</p>
       <div class="home-grid" id="homeGrid">
         <button class="home-card c-yellow" type="button" data-ir="cardapio">
           <span class="icon">🍜</span>
@@ -1061,19 +1079,46 @@ function renderNav(categorias){
   lista.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => {
     document.getElementById(chip.dataset.alvo).scrollIntoView();
   }));
+  const ind = document.createElement('div');
+  ind.className = 'cat-ind'; ind.setAttribute('aria-hidden', 'true');
+  lista.prepend(ind); lista.classList.add('com-ind');
+  window._indCat = { ind, chip: null };
 
   if (!('IntersectionObserver' in window)) return;
   if (window._obsCat) window._obsCat.disconnect();
   const marcar = id => lista.querySelectorAll('.chip').forEach(ch => {
     const ativo = ch.dataset.alvo === id;
     ch.classList.toggle('ativo', ativo);
-    if (ativo) ch.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (ativo) { ch.scrollIntoView({ block: 'nearest', inline: 'nearest' }); moverIndicador(ch); }
   });
   window._obsCat = new IntersectionObserver(entradas => {
     entradas.forEach(e => { if (e.isIntersecting) marcar(e.target.id); });
   }, { rootMargin: '-30% 0px -60% 0px' });
   document.querySelectorAll('.secao').forEach(s => window._obsCat.observe(s));
+  window._indCat.atual = null;
   marcar('cat-' + slug(categorias[0].nome));
+}
+
+// Indicador elástico (receita 20): a borda da frente sai na hora e a de trás vai 70 ms depois,
+// com um leve exagero no fim. Sem movimento quando o aparelho pede "reduzir movimento".
+function moverIndicador(chip){
+  const st = window._indCat; if (!st || !chip || !chip.offsetWidth) return;
+  const { ind } = st, para = { l: chip.offsetLeft, w: chip.offsetWidth, t: chip.offsetTop, h: chip.offsetHeight };
+  ind.style.top = para.t + 'px'; ind.style.height = para.h + 'px';
+  const de = st.atual;
+  st.atual = para; st.chip = chip;
+  if (!de || SEM_MOVIMENTO) { ind.style.left = para.l + 'px'; ind.style.width = para.w + 'px'; return; }
+  const dir = para.l > de.l, D = 340, ATRASO = 70, t0 = performance.now(), id = st.anim = (st.anim || 0) + 1;
+  const volta = t => { const c1 = 1.2, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+  const passo = now => {
+    if (st.anim !== id) return;
+    const e = now - t0, frente = volta(Math.min(1, e / D)), tras = volta(Math.max(0, Math.min(1, (e - ATRASO) / D)));
+    const kL = dir ? tras : frente, kR = dir ? frente : tras;
+    const L = de.l + (para.l - de.l) * kL, R = (de.l + de.w) + ((para.l + para.w) - (de.l + de.w)) * kR;
+    ind.style.left = L + 'px'; ind.style.width = Math.max(12, R - L) + 'px';
+    if (e < D + ATRASO) requestAnimationFrame(passo);
+  };
+  requestAnimationFrame(passo);
 }
 
 function renderLinks(){
@@ -1202,10 +1247,34 @@ function irPara(nome){
 }
 window.addEventListener('hashchange', mostrarTela);
 window.addEventListener('popstate', mostrarTela);
+var SEM_MOVIMENTO = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Botão com peso (receita 07): o cartão afunda, pula e assenta, com a sombra sólida acompanhando.
+function comPeso(el){
+  if (SEM_MOVIMENTO || !el.animate) return 0;
+  const sh = n => n + 'px ' + n + 'px 0 rgba(0,0,0,0.35)';
+  el.animate([
+    { transform: 'translate(0,0) scale(1)', boxShadow: sh(5) },
+    { transform: 'translate(4px,4px) scale(.96)', boxShadow: sh(1), offset: .25 },
+    { transform: 'translate(-2px,-2px) scale(1.03)', boxShadow: sh(7), offset: .6 },
+    { transform: 'translate(0,0) scale(.995)', boxShadow: sh(5), offset: .8 },
+    { transform: 'translate(0,0) scale(1)', boxShadow: sh(5) }
+  ], { duration: 480, easing: 'ease-out' });
+  return 220; // espera só o "afundar e voltar" antes de trocar de tela
+}
 document.addEventListener('click', e => {
+  const card = e.target.closest('.home-card');
+  const espera = card ? comPeso(card) : 0;
   const alvo = e.target.closest('[data-ir]');
-  if (alvo) irPara(alvo.dataset.ir);
+  if (alvo) espera ? setTimeout(() => irPara(alvo.dataset.ir), espera) : irPara(alvo.dataset.ir);
 });
+// Entrada da tela inicial: marca-texto em "rua" (15) e depois o sublinhado nas cidades (14).
+(function entradaInicio(){
+  const mk = document.getElementById('mkRua'), uls = [...document.querySelectorAll('.home .sobre .ul')];
+  if (!mk) return;
+  if (SEM_MOVIMENTO) { mk.classList.add('on'); uls.forEach(u => u.classList.add('on')); return; }
+  setTimeout(() => mk.classList.add('on'), 700);
+  uls.forEach((u, i) => setTimeout(() => u.classList.add('on'), 1300 + i * 180));
+})();
 
 // ---------------------------------------------------------------------------
 // agenda (onde estamos)
