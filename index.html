@@ -363,29 +363,6 @@
   .especiais h3{font-family:'Titan One',cursive;font-weight:400;font-size:20px;margin:0 0 4px;color:var(--orange);}
   .aviso-demo{margin:0 0 14px;background:#2a1f0d;border:2px dashed var(--orange);color:var(--orange);border-radius:10px;padding:8px 12px;font-size:12.5px;font-weight:600;text-align:center;}
 
-
-  /* ---------- pontos fixos (estilo do bloco Contact 14 do React Bits Pro) ---------- */
-  .pontos{margin-top:14px;}
-  .pontos h3{font-family:'Titan One',cursive;font-weight:400;font-size:22px;margin:0;}
-  .pontos ul{list-style:none;margin:12px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;}
-  .ponto{background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:var(--radius);box-shadow:5px 5px 0 rgba(64,213,232,.6);overflow:hidden;display:flex;flex-direction:column;
-    opacity:0;transform:translateY(16px);transition:opacity .6s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.22,1,.36,1);}
-  .ponto.visto{opacity:1;transform:none;}
-  .ponto.hoje{box-shadow:5px 5px 0 var(--orange);}
-  .ponto .mapa{height:220px;border-top:0;}
-  .ponto .corpo{padding:14px 18px 18px;display:flex;flex-direction:column;flex:1;}
-  .ponto .dia{font-weight:800;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:#0f7f8c;}
-  .ponto h4{font-family:'Titan One',cursive;font-weight:400;font-size:24px;line-height:1.1;margin:2px 0 0;}
-  .ponto .status{margin-top:12px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;}
-  .ponto .status i{width:10px;height:10px;border-radius:50%;background:#c9c2b0;border:2px solid var(--ink);flex-shrink:0;}
-  .ponto.hoje .status i{background:var(--green);animation:pisca 2s ease-in-out infinite;}
-  @keyframes pisca{50%{opacity:.35}}
-  .ponto address{font-style:normal;font-size:13.5px;color:var(--ink-soft);margin-top:8px;line-height:1.45;}
-  .ponto .acoes{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:14px;}
-  .ponto .acoes a{background:var(--orange);color:var(--ink);border:2px solid var(--ink);border-radius:10px;padding:10px 14px;font-family:'Titan One',cursive;font-size:15px;text-decoration:none;box-shadow:3px 3px 0 var(--ink);}
-  .ponto .acoes a.sec{background:#fff;}
-  @media (max-width:700px){ .pontos ul{grid-template-columns:1fr;} }
-  @media (prefers-reduced-motion:reduce){ .ponto{transition:none;opacity:1;transform:none;} .ponto.hoje .status i{animation:none;} }
   @media (max-width:600px){
     .wrap{padding:0 30px;}
     .mapa{height:280px;}
@@ -1406,56 +1383,6 @@ function htmlLocal(ev, rotulo, hoje){
     </article>`;
 }
 
-
-// ---------------------------------------------------------------------------
-// Pontos fixos da semana (estilo do bloco Contact 14 do React Bits Pro): um
-// card por ponto com mapa, "Hoje tem Narua aqui" ou "Volta quinta", endereço,
-// menu e como chegar. Sem horário até a Narua definir.
-// ---------------------------------------------------------------------------
-const PONTOS_FIXOS = [
-  { dia_semana: 4, dia: 'Toda quinta', local: 'Nova Caieiras', endereco: 'Ver. Bento Rodrigues, Nova Caieiras, Caieiras - SP, 07700-000' },
-  { dia_semana: 6, dia: 'Todo sábado', local: '7 de setembro', endereco: 'Av. Sete de Setembro, 45, Franco da Rocha - SP' }
-];
-const NOMES_DIA = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
-function diaSemanaSP(){
-  return new Date(agoraSP().data + 'T12:00:00Z').getUTCDay();
-}
-function statusPonto(pt, hoje){
-  if (hoje === pt.dia_semana) return { hoje: true, texto: 'Hoje tem Narua aqui' };
-  const falta = (pt.dia_semana - hoje + 7) % 7;
-  return { hoje: false, texto: falta === 1 ? 'Volta amanhã' : `Volta ${NOMES_DIA[pt.dia_semana]}` };
-}
-function htmlPontos(){
-  const hoje = diaSemanaSP();
-  return `<section class="pontos"><h3>Nossos pontos fixos</h3><ul>` +
-    PONTOS_FIXOS.map((pt, i) => {
-      const st = statusPonto(pt, hoje);
-      return `
-    <li class="ponto${st.hoje ? ' hoje' : ''}" data-i="${i}">
-      <iframe class="mapa" src="${esc(urlMapa(pt))}" title="Mapa: ${esc(pt.local)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      <div class="corpo">
-        <span class="dia">${esc(pt.dia)}</span>
-        <h4>${esc(pt.local)}</h4>
-        <p class="status"><i></i><span>${esc(st.texto)}</span></p>
-        <address>${esc(pt.endereco)}</address>
-        <div class="acoes">
-          <a href="#cardapio/normal">📋 Ver menu</a>
-          <a class="sec" href="${esc(urlComoChegar(pt))}" target="_blank" rel="noopener">🧭 Como chegar</a>
-        </div>
-      </div>
-    </li>`;
-    }).join('') + `</ul></section>`;
-}
-function ligarPontos(){
-  const lis = document.querySelectorAll('.ponto');
-  if (!('IntersectionObserver' in window)) { lis.forEach(li => li.classList.add('visto')); return; }
-  const io = new IntersectionObserver(es => es.forEach(e => {
-    if (!e.isIntersecting) return;
-    setTimeout(() => e.target.classList.add('visto'), Number(e.target.dataset.i) * 60);
-    io.unobserve(e.target);
-  }), { rootMargin: '-40px' });
-  lis.forEach(li => io.observe(li));
-}
 let ULTIMA_AGENDA = null;
 function renderAgenda(dados){
   ULTIMA_AGENDA = dados;
@@ -1467,8 +1394,7 @@ function renderAgenda(dados){
   if (!dados) {
     faixa.hidden = true;
     sub.textContent = 'Onde o food truck está hoje';
-    caixa.innerHTML = htmlPontos() + `<article class="local"><div class="sem-evento"><span class="emoji">📍</span><p>Não conseguimos carregar a agenda agora.</p><p>A programação também sai no nosso Instagram.</p>${insta}</div></article>`;
-    ligarPontos();
+    caixa.innerHTML = `<article class="local"><div class="sem-evento"><span class="emoji">📍</span><p>Não conseguimos carregar a agenda agora.</p><p>A programação também sai no nosso Instagram.</p>${insta}</div></article>`;
     return;
   }
 
@@ -1484,7 +1410,7 @@ function renderAgenda(dados){
     else sub.textContent = ag.proximo ? 'Próximo: ' + diaPorExtenso(ag.proximo.data, ag.hojeData) + ', ' + (ag.proximo.local || ag.proximo.evento) : 'Agenda e localização';
   }
 
-  let html = htmlPontos();
+  let html = '';
   if (ag.hoje) html += htmlLocal(ag.hoje, 'Hoje estamos em', ag.hojeData);
   else if (ag.proximo) html += `<p class="linha" style="margin:10px 0 0;color:#cfc7b4;font-size:14px;">Hoje o food truck não está na rua. Nosso próximo evento:</p>` + htmlLocal(ag.proximo, 'Próximo evento', ag.hojeData);
   else html += `<article class="local"><div class="sem-evento"><span class="emoji">🚚</span><p><b>Hoje o food truck não está na rua.</b></p><p>Os próximos eventos saem aqui e no nosso Instagram.</p>${insta}</div></article>`;
@@ -1503,7 +1429,6 @@ function renderAgenda(dados){
       </li>`).join('') + `</ul></section>`;
   }
   caixa.innerHTML = html;
-  ligarPontos();
 }
 
 // Agenda de exemplo para testar sem a planilha (?demo=semana|hoje|nada).
